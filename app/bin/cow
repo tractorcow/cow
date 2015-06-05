@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+set_time_limit(0);
+date_default_timezone_set('Pacific/Auckland'); 
+
+// include the composer autoloader
+// Works if included in vendor/bin/cow or app/bin/cow
+require_once __DIR__ . '/../../vendor/autoload.php'; 
+
+$app = new SilverStripe\Cow\CowApp();
+$app->run();
+
