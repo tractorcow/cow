@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "32522eafcbdb86076ee3c0ad67a697e9",
+    "hash": "0f414ce41181077f027b41db7471cd48",
     "packages": [
         {
             "name": "symfony/console",
-            "version": "2.8.x-dev",
+            "version": "v2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Console.git",
-                "reference": "b3883bdaf15d0b254f624771b301b7cdd301d4ea"
+                "reference": "7f0bec04961c61c961df0cb8c2ae88dbfd83f399"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Console/zipball/b3883bdaf15d0b254f624771b301b7cdd301d4ea",
-                "reference": "b3883bdaf15d0b254f624771b301b7cdd301d4ea",
+                "url": "https://api.github.com/repos/symfony/Console/zipball/7f0bec04961c61c961df0cb8c2ae88dbfd83f399",
+                "reference": "7f0bec04961c61c961df0cb8c2ae88dbfd83f399",
                 "shasum": ""
             },
             "require": {
@@ -25,9 +25,9 @@
             },
             "require-dev": {
                 "psr/log": "~1.0",
-                "symfony/event-dispatcher": "~2.1|~3.0.0",
-                "symfony/phpunit-bridge": "~2.7|~3.0.0",
-                "symfony/process": "~2.1|~3.0.0"
+                "symfony/event-dispatcher": "~2.1",
+                "symfony/phpunit-bridge": "~2.7",
+                "symfony/process": "~2.1"
             },
             "suggest": {
                 "psr/log": "For using the console logger",
@@ -37,7 +37,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.8-dev"
+                    "dev-master": "2.7-dev"
                 }
             },
             "autoload": {
@@ -61,15 +61,13 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2015-06-04 20:21:09"
+            "time": "2015-05-29 16:22:24"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "symfony/console": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

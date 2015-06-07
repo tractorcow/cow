@@ -2,18 +2,23 @@
 
 namespace SilverStripe\Cow\Commands;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+class MooCommand extends Command
+{
+    /**
+     * @var string
+     */
+    protected $name = "cow:moo";
 
-class MooCommand extends Command {
+    /**
+     * @var string
+     */
+    protected $description = "Discuss with cow.";
 
-    protected function configure() {
-        $this->setName("cow:moo")
-             ->setDescription("Discuss with cow");
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output) {
-        $output->writeln('moo');
+    /**
+     * {@inheritdoc}
+     */
+    protected function fire()
+    {
+        $this->output->writeln("moo");
     }
 }

@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+
+set_time_limit(0);
+
+date_default_timezone_set("Pacific/Auckland");
+
+$paths = [
+    __DIR__ . "/../autoload.php",
+    __DIR__ . "/../vendor/autoload.php",
+];
+
+$included = false;
+
+foreach ($paths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        $included = true;
+    }
+}
+
+if (!$included) {
+    throw new RuntimeException("What is Composer? Is a food?");
+}
+
+$app = new SilverStripe\Cow\Application();
+$app->run();
