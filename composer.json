@@ -8,15 +8,15 @@
             "email": "damian@silverstripe.com"
         }
     ],
-	"bin": [
-		"app/bin/cow"
-	],
-	"autoload": {
+    "bin": [
+        "app/bin/cow"
+    ],
+    "autoload": {
         "psr-4": {
-			"SilverStripe\\Cow\\": "src/"
-		}
+            "SilverStripe\\Cow\\": "src/"
+        }
     },
     "require": {
-        "symfony/console": "2.8.x-dev"
+        "symfony/console": "^2.7"
     }
 }
