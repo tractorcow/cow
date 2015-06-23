@@ -3,6 +3,8 @@
 namespace SilverStripe\Cow\Commands;
 
 use Symfony\Component\Console;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class Command extends Console\Command\Command
 {
@@ -17,12 +19,12 @@ abstract class Command extends Console\Command\Command
     protected $description;
 
     /**
-     * @var Console\Input\InputInterface
+     * @var InputInterface
      */
     protected $input;
 
     /**
-     * @var Console\Output\OutputInterface
+     * @var OutputInterface
      */
     protected $output;
 
@@ -38,7 +40,7 @@ abstract class Command extends Console\Command\Command
     /**
      * {@inheritdoc}
      */
-    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->input = $input;
         $this->output = $output;
