@@ -16,6 +16,7 @@ class Application extends Console\Application
 
         $commands[] = new Commands\MooCommand();
 		$commands[] = new Commands\Project\Create();
+		$commands[] = new Commands\Release\Changelog();
 
         return $commands;
     }

@@ -19,7 +19,8 @@ class CreateProject extends Step {
 	
 	protected $directory;
 	
-	public function __construct($version, $directory = '.') {
+	public function __construct(Command $command, $version, $directory = '.') {
+		parent::__construct($command);
 		$this->version = $version;
 		$this->directory = $directory ?: '.';
 	}

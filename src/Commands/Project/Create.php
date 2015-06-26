@@ -28,20 +28,20 @@ class Create extends Command {
 		
 		$this
 			->addArgument('version', InputArgument::REQUIRED, 'Composer constraint to create this project with')
-			->addArgument('directory', InputArgument::OPTIONAL, 'Optional directory to create this project in')
-			->addOption('security', 's', InputOption::VALUE_OPTIONAL, 'Update git remotes to point to security project');
+			->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to create this project in')
+			->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project');
 	}
 	
 	
 	protected function fire() {
 		$version = $this->input->getArgument('version');
-		$directory = $this->input->getArgument('directory');
+		$directory = $this->input->getOption('directory');
 		
 		if($this->input->getOption('security')) {
 			throw new InvalidArgumentException('--security flag not yet implemented');
 		}
 		
-		$step = new CreateProject($version, $directory);
+		$step = new CreateProject($this, $version, $directory);
 		$step->run($this->input, $this->output);
 	}
 
