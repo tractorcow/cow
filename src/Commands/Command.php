@@ -3,6 +3,7 @@
 namespace SilverStripe\Cow\Commands;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,6 +38,14 @@ abstract class Command extends Console\Command\Command
     {
         $this->setName($this->name);
         $this->setDescription($this->description);
+
+		array_map(function($argument) {
+			call_user_func_array([$this, "addArgument"], $argument);
+		}, $this->getArguments());
+
+		array_map(function($option) {
+			call_user_func_array([$this, "addOption"], $option);
+		}, $this->getOptions());
     }
 
     /**
@@ -110,5 +119,75 @@ abstract class Command extends Console\Command\Command
 		$this->toVersion = $this->ask("<question>Last tag to build changelog from?: </question>");
 		$this->validateVersion($this->toVersion);
 		return $this->toVersion;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getArguments()
+	{
+		return [
+			// "argument", InputArgument::REQUIRED, "argument description",
+		];
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return [
+			// "option", "o", InputOption::VALUE_REQUIRED, "option description"
+		];
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed  $default
+	 *
+	 * @return mixed
+     */
+    protected function getArgument($name, $default = null)
+	{
+		$argument = $this->input->getArgument($name);
+
+		if (empty($argument)) {
+			return $default;
+		}
+
+		return $argument;
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed  $default
+	 *
+	 * @return mixed
+     */
+    protected function getOption($name, $default = null)
+	{
+		$option = $this->input->getOption($name);
+
+		if (empty($option)) {
+			return $default;
+		}
+
+		return $option;
+	}
+
+	/**
+	 * @param string $command
+	 *
+	 * @return string
+     */
+    protected function exec($command)
+	{
+		exec($command, $output, $code);
+
+		if ($code !== 0) {
+			throw new RuntimeException("Command unsuccessful");
+		}
+
+		return $output;
 	}
 }
