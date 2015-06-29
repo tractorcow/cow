@@ -1,0 +1,7 @@
+# Commands:
+# i, ignore = do nothing with this branch
+# s, sync = sync changes with tracking branch
+# f, fetch = fetch branch from upstream
+# d, delete = delete branch from local repository
+#
+# These lines can be re-ordered.
