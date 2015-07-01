@@ -32,15 +32,10 @@ class Create extends Command {
 			->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to create this project in')
 			->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project');
 	}
-	
-	
+
 	protected function fire() {
-		$version = new ReleaseVersion($this->input->getArgument('version'));
-		
-		$directory = $this->input->getOption('directory');
-		if(!$directory) {
-			$directory = $this->pickDirectory($version);
-		}
+		$version = $this->getInputVersion();
+		$directory = $this->getInputDirectory($version);
 
 		$security = $this->input->getOption('security');
 		if($security) {

@@ -18,6 +18,12 @@ class CreateChangeLog extends Step {
 	 * @var ReleaseVersion
 	 */
 	protected $version;
+	
+	/**
+	 *
+	 * @var ReleaseVersion
+	 */
+	protected $from;
 
 	/**
 	 *
@@ -25,10 +31,11 @@ class CreateChangeLog extends Step {
 	 */
 	protected $directory;
 	
-	public function __construct(Command $command, ReleaseVersion $version, $directory = '.') {
+	public function __construct(Command $command, ReleaseVersion $version, ReleaseVersion $from, $directory = '.') {
 		parent::__construct($command);
 		
 		$this->version = $version;
+		$this->from = $from;
 		$this->directory = $directory ?: '.';
 	}
 	
@@ -38,12 +45,10 @@ class CreateChangeLog extends Step {
 		
 		// Check branch
 		$branch = $project->getBranch();
-		$fromVersion = $this->command->getFromVersion();
-		$toVersion = $this->command->getToVersion();
 		
 		// Todo - make the changelog
 		var_dump($branch);
-		var_dump($fromVersion);
-		var_dump($toVersion);
+		var_dump($this->from->getValue());
+		var_dump($this->version->getValue());
 	}
 }

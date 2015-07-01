@@ -26,9 +26,15 @@ class ReleaseVersion {
 	 * @var string|null
 	 */
 	protected $stability;
+	
+	/**
+	 *
+	 * @var int|null
+	 */
+	protected $stabilityVersion;
 
 	public function __construct($version) {
-		if(!preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>(rc|alpha|beta)\d*))?$/', $version, $matches)) {
+		if(!preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>rc|alpha|beta)(?<stabilityVersion>\d+)?)?$/', $version, $matches)) {
 			throw new InvalidArgumentException(
 				"Invalid version $version. Expect full version (3.1.13) with optional rc|alpha|beta suffix"
 			);
@@ -36,15 +42,51 @@ class ReleaseVersion {
 		$this->major = $matches['major'];
 		$this->minor = $matches['minor'];
 		$this->patch = $matches['patch'];
+		$this->stabilityVersion = null;
 		if(empty($matches['stability'])) {
 			$this->stability = null;
 		} else {
 			$this->stability = $matches['stability'];
+			if(!empty($matches['stabilityVersion'])) {
+				$this->stabilityVersion = $matches['stabilityVersion'];
+			}
 		}
 	}
 
 	public function __toString() {
 		return $this->getValue();
+	}
+	
+	public function getStability() {
+		return $this->stability;
+	}
+	
+	public function setStability($stability) {
+		$this->stability = $stability;
+	}
+	
+	public function getStabilityVersion() {
+		return $this->stabilityVersion;
+	}
+	
+	public function setStabilityVersion($stabilityVersion) {
+		$this->stabilityVersion = $stabilityVersion;
+	}
+	
+	public function getMajor() {
+		return $this->major;
+	}
+	
+	public function setMajor($major) {
+		$this->major = $major;
+	}
+	
+	public function getPatch() {
+		return $this->patch;
+	}
+	
+	public function setPatch($patch) {
+		$this->patch = $patch;
 	}
 
 	/**
@@ -55,7 +97,7 @@ class ReleaseVersion {
 	public function getValue() {
 		$value = implode('.', array($this->major, $this->minor, $this->patch));
 		if($this->stability) {
-			$value .= "-{$this->stability}";
+			$value .= "-{$this->stability}{$this->stabilityVersion}";
 		}
 		return $value;
 	}
@@ -81,5 +123,37 @@ class ReleaseVersion {
 		// If we need to fallback to dev-master we probably have done something wrong
 		
 		return $versions;
+	}
+	
+	/**
+	 * Guess the best prior version to release as changelog
+	 * 
+	 * @return ReleaseVersion
+	 */
+	public function getPriorVersion() {
+		$prior = clone $this;
+		
+		// If beta2 or above, guess prior version to be beta1
+		$stabilityVersion = $prior->getStabilityVersion();
+		if($stabilityVersion > 1) {
+			$prior->setStabilityVersion($stabilityVersion - 1);
+			return $prior;
+		}
+		
+		// Set prior version to stable only
+		$prior->setStability(null);
+		$prior->setStabilityVersion(null);
+		
+		// If patch version is 0 we really can't guess
+		$patch = $prior->getPatch();
+		if(empty($patch)) {
+			throw new \InvalidArgumentException(
+				"Can't guess version which comes before " . $this->getValue()
+			);
+		}
+		
+		// Select prior patch version (e.g. 3.1.14 -> 3.1.13)
+		$prior->setPatch($patch - 1);
+		return $prior;
 	}
 }

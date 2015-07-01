@@ -2,8 +2,6 @@
 
 namespace SilverStripe\Cow\Commands;
 
-use Exception;
-use InvalidArgumentException;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use Symfony\Component\Console;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,42 +53,61 @@ abstract class Command extends Console\Command\Command
      * Defers to the subclass functionality.
      */
     abstract protected function fire();
-
+	
 	/**
-	 * Error if version is invalid
+	 * Get the version to release
 	 * 
-	 * @param string $version
-	 * @return array List of major, minor, patch, and stability identifier (null if stable)
-	 * @throws InvalidArgumentException
+	 * @return ReleaseVersion
 	 */
-	public function validateVersion($version) {
-		if(!preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>(rc|alpha|beta)\d*))?$/', $version, $matches)) {
-			throw new InvalidArgumentException(
-				"Invalid version $version. Expect full version (3.1.13) with optional rc|alpha|beta suffix"
-			);
+	protected function getInputVersion() {
+		// Version
+		$value = $this->input->getArgument('version');
+		return new ReleaseVersion($value);
+	}
+	
+	/**
+	 * Determine the 'from' version for generating changelogs
+	 * 
+	 * @param ReleaseVersion $version
+	 */
+	protected function getInputFromVersion(ReleaseVersion $version) {
+		$value = $this->input->getOption('from');
+		if($value) {
+			return new ReleaseVersion($value);
+		} else {
+			return $version->getPriorVersion();
 		}
-		$stability = empty($matches['stability']) ? null : $matches['stability'];
-		return array($matches['major'], $matches['minor'], $matches['patch'], $stability);
+	}
+	
+	/**
+	 * Get the directory the project is, or will be in
+	 * 
+	 * @param ReleaseVersion $version
+	 * @return string
+	 */
+	protected function getInputDirectory(ReleaseVersion $version) {
+		$directory = $this->input->getOption('directory');
+		if(!$directory) {
+			$directory = $this->pickDirectory($version);
+		}
+		return $directory;
 	}
 
-
-
 	/**
-	 * Guess a directory to install the given version
+	 * Guess a directory to install/read the given version
 	 *
 	 * @param ReleaseVersion $version
 	 * @return string
-	 * @throws Exception
 	 */
 	protected function pickDirectory(ReleaseVersion $version) {
-		$path = getenv('COW_RELEASE_PATH');
-		if(empty($path)) {
-			throw new Exception('Please set COW_RELEASE_PATH in your ~/.bash_profile');
+		$filename = DIRECTORY_SEPARATOR . 'release-' . $version->getValue();
+		$cwd = getcwd();
+		
+		// Check if we are already in this directory
+		if(strrpos($cwd, $filename) === strlen($cwd) - strlen($filename)) {
+			return $cwd;
 		}
-		if(!realpath($path)) {
-			throw new Exception("{$path} does not exist");
-		}
-
-		return realpath($path) . DIRECTORY_SEPARATOR . 'release-' . $version->getValue();
+		
+		return $cwd . $filename;
 	}
 }

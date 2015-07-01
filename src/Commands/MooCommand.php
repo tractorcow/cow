@@ -7,7 +7,7 @@ class MooCommand extends Command
     /**
      * @var string
      */
-    protected $name = "cow:moo";
+    protected $name = "moo";
 
     /**
      * @var string
