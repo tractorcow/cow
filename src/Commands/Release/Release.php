@@ -33,8 +33,14 @@ class Release extends Command {
 	
 	
 	protected function fire() {
-		$version = $this->input->getArgument('version');
+		$version = new ReleaseVersion($this->input->getArgument('version'));
+
 		$directory = $this->input->getOption('directory');
+		if(!$directory) {
+			$directory = $this->pickDirectory($version);
+		}
+
+		// todo - stuff
 		
 		
 	}

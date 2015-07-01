@@ -2,11 +2,12 @@
 
 namespace SilverStripe\Cow\Commands;
 
+use Exception;
 use InvalidArgumentException;
+use SilverStripe\Cow\Model\ReleaseVersion;
 use Symfony\Component\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 abstract class Command extends Console\Command\Command
 {
@@ -58,57 +59,38 @@ abstract class Command extends Console\Command\Command
 	/**
 	 * Error if version is invalid
 	 * 
-	 * @param type $version
+	 * @param string $version
+	 * @return array List of major, minor, patch, and stability identifier (null if stable)
 	 * @throws InvalidArgumentException
 	 */
-	protected function validateVersion($version) {
-		if(!preg_match('/^(\d+)\.(\d+)\.(\d+)(\-(rc|alpha|beta)\d*)?$/', $version)) {
-			throw new InvalidArgumentException("Invalid version $version. Expect full version (3.1.13) with optional rc|alpha|beta suffix");
+	public function validateVersion($version) {
+		if(!preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>(rc|alpha|beta)\d*))?$/', $version, $matches)) {
+			throw new InvalidArgumentException(
+				"Invalid version $version. Expect full version (3.1.13) with optional rc|alpha|beta suffix"
+			);
 		}
+		$stability = empty($matches['stability']) ? null : $matches['stability'];
+		return array($matches['major'], $matches['minor'], $matches['patch'], $stability);
 	}
-	
+
+
+
 	/**
-	 * Ask a question from the user
-	 * 
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 * @param type $text
-	 */
-	protected function ask($text) {
-		$helper = $this->getHelper('question');
-		$question = new Question($text);
-		return $helper->ask($this->input, $this->output, $question);
-	}
-	
-	protected $fromVersion = null;
-	
-	/**
-	 * Get the from version to release from
-	 * 
+	 * Guess a directory to install the given version
+	 *
+	 * @param ReleaseVersion $version
 	 * @return string
+	 * @throws Exception
 	 */
-	public function getFromVersion() {
-		if($this->fromVersion) {
-			return $this->fromVersion;
+	protected function pickDirectory(ReleaseVersion $version) {
+		$path = getenv('COW_RELEASE_PATH');
+		if(empty($path)) {
+			throw new Exception('Please set COW_RELEASE_PATH in your ~/.bash_profile');
 		}
-		$this->fromVersion = $this->ask("<question>Last tag to build changelog from?: </question>");
-		$this->validateVersion($this->fromVersion);
-		return $this->fromVersion;
-	}
-	
-	protected $toVersion = null;
-	
-	/**
-	 * Get the to version to release
-	 * 
-	 * @return string
-	 */
-	public function getToVersion() {
-		if($this->toVersion) {
-			return $this->toVersion;
+		if(!realpath($path)) {
+			throw new Exception("{$path} does not exist");
 		}
-		$this->toVersion = $this->ask("<question>Last tag to build changelog from?: </question>");
-		$this->validateVersion($this->toVersion);
-		return $this->toVersion;
+
+		return realpath($path) . DIRECTORY_SEPARATOR . 'release-' . $version->getValue();
 	}
 }

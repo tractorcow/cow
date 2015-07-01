@@ -2,7 +2,7 @@
 
 namespace SilverStripe\Cow\Commands\Release;
 
-use InvalidArgumentException;
+use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Steps\Release\CreateChangeLog;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,9 +32,14 @@ class ChangeLog extends Command {
 	}
 	
 	protected function fire() {
-		$version = $this->input->getArgument('version');
+		$version = new ReleaseVersion($this->input->getArgument('version'));
+
 		$directory = $this->input->getOption('directory');
-	
+		if(!$directory) {
+			$directory = $this->pickDirectory($version);
+		}
+
+		// Steps
 		$step = new CreateChangeLog($this, $version, $directory);
 		$step->run($this->input, $this->output);
 	}
