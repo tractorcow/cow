@@ -20,7 +20,20 @@ abstract class Step {
 		$this->command = $command;
 	}
 
+	abstract public function getStepName();
+
 	abstract public function run(InputInterface $input, OutputInterface $output);
+
+	protected function log(OutputInterface $output, $message, $format = '') {
+		$name = $this->getStepName();
+		$text = "<bold>[{$name}]</bold> ";
+		if($format) {
+			$text .= "<{$format}>{$message}</{$format}>";
+		} else {
+			$text .= $message;
+		}
+		$output->writeln($text);
+	}
 
 	/**
 	 *

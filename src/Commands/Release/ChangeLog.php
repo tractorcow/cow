@@ -33,7 +33,6 @@ class ChangeLog extends Command {
 	}
 	
 	protected function fire() {
-		
 		// Get arguments
 		$version = $this->getInputVersion();
 		$fromVersion = $this->getInputFromVersion($version);

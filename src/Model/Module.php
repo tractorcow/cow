@@ -2,12 +2,17 @@
 
 namespace SilverStripe\Cow\Model;
 
+use Gitonomy\Git\Reference\Branch;
+use Gitonomy\Git\Repository;
+use InvalidArgumentException;
+
 /**
  * A module installed in a project
  */
 class Module {
 	
 	/**
+	 * Parent project (installer module)
 	 *
 	 * @var Project
 	 */
@@ -28,13 +33,79 @@ class Module {
 	 */
 	protected $directory;
 	
-	public function __construct(Project $parent, $name, $directory) {
-		$this->parent = $parent;
+	public function __construct($directory, $name, Project $parent = null) {
+		$this->directory = realpath($directory);
 		$this->name = $name;
-		$this->directory = $directory;
+		$this->parent = $parent;
+		
+		if(!$this->isValid()) {
+			throw new InvalidArgumentException("No module in directory \"{$this->directory}\"");
+		}
+	}
+
+	/**
+	 * Get the directory this module is saved in
+	 *
+	 * @return string
+	 */
+	public function getDirectory() {
+		return $this->directory;
+	}
+	
+	/**
+	 * A project is valid if it has a root composer.json
+	 */
+	public function isValid() {
+		return $this->directory && realpath($this->directory . '/composer.json');
 	}
 	
 	public function getName() {
 		return $this->name;
+	}
+	
+	/**
+	 * Get github team name (normally 'silverstripe')
+	 * 
+	 * @return string
+	 */
+	public function getTeam() {
+		switch($this->name) {
+			case 'reports':
+				return 'silverstripe-labs';
+			default:
+				return 'silverstripe';
+		}
+	}
+	
+	/**
+	 * Get link to github module
+	 * 
+	 * @return string
+	 */
+	public function getLink() {
+		$team = $this->getTeam();
+		$name = $this->getName();
+		return "https://github.com/{$team}/silverstripe-{$name}/";
+	}
+	
+	/**
+	 * Get git repo for this module
+	 * 
+	 * @return Repository
+	 */
+	public function getRepository() {
+		return new Repository($this->directory);
+	}
+	
+	/**
+	 * Figure out the branch this composer is installed against
+	 */
+	public function getBranch() {
+		$head = $this
+			->getRepository()
+			->getHead();
+		if($head instanceof Branch) {
+			return $head->getName();
+		}
 	}
 }

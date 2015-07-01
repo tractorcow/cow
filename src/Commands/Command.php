@@ -4,6 +4,7 @@ namespace SilverStripe\Cow\Commands;
 
 use SilverStripe\Cow\Model\ReleaseVersion;
 use Symfony\Component\Console;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -45,6 +46,9 @@ abstract class Command extends Console\Command\Command
     {
         $this->input = $input;
         $this->output = $output;
+
+		// Configure extra output formats
+		$this->output->getFormatter()->setStyle('bold', new OutputFormatterStyle('blue'));
 
         $this->fire();
     }

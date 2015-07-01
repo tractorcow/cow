@@ -52,6 +52,7 @@ class CreateProject extends Step {
 		// Pick and install this version
 		$version = $this->getBestVersion($output);
 		$this->installVersion($output, $version);
+		$this->log($output, "Project successfully created!");
 	}
 
 	/**
@@ -77,7 +78,7 @@ class CreateProject extends Step {
 	 * @param string $version
 	 */
 	protected function installVersion(OutputInterface $output, $version) {
-		$output->writeln("<info>Installing version {$version} in {$this->directory}</info>");
+		$this->log($output, "Installing version <info>{$version}</info> in <info>{$this->directory}</info>");
 		$command = array(
 			"composer", "create-project", "--prefer-source", "--keep-vcs", $this->package, $this->directory, $version
 		);
@@ -95,7 +96,7 @@ class CreateProject extends Step {
 	 * @throws \InvalidArgumentException
 	 */
 	protected function getBestVersion(OutputInterface $output) {
-		$output->writeln('<info>Determining best version to install</info>');
+		$this->log($output, 'Determining best version to install');
 		
 		// Determine best version to install
 		$available = $this->getAvailableVersions($output);
@@ -110,4 +111,9 @@ class CreateProject extends Step {
 
 		throw new \InvalidArgumentException("Could not install project from version ".$this->version->getValue());
 	}
+
+	public function getStepName() {
+		return 'create project';
+	}
+
 }

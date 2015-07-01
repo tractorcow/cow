@@ -2,52 +2,25 @@
 
 namespace SilverStripe\Cow\Model;
 
-use Gitonomy\Git\Reference\Branch;
-use Gitonomy\Git\Repository;
-use InvalidArgumentException;
-
 /**
  * Represents information about a project in a given directory
+ * 
+ * Is also the 'silverstripe-installer' module
  */
-class Project {
-	
-	protected $directory;
+class Project extends Module {
 	
 	public function __construct($directory) {
-		$this->directory = realpath($directory);
-		
-		if(!$this->isValid()) {
-			throw new InvalidArgumentException("No project in directory \"{$this->directory}\"");
-		}
+		parent::__construct($directory, 'installer');
 	}
 	
 	/**
-	 * A project is valid if it has a root composer.json
-	 */
-	public function isValid() {
-		return $this->directory && realpath($this->directory . '/composer.json');
-	}
-	
-	/**
-	 * Figure out the branch this composer is installed against
-	 */
-	public function getBranch() {
-		$repository = new Repository($this->directory);
-		$head = $repository->getHead();
-		if($head instanceof Branch) {
-			return $head->getName();
-		}
-	}
-	
-	/**
-	 * Gets the list of modules in this project
+	 * Gets the list of modules in this installer
 	 */
 	public function getModules() {
 		$ignore = array('mysite', 'assets', 'vendor');
-		$modules = array();
 		
-		// Include installer
-		$modules[] = new Module($this, 'installer', $this->directory);
+		// Include self as head module
+		$modules = array($this);
 		
 		// Search all directories
 		foreach(glob($this->directory."/*", GLOB_ONLYDIR) as $dir) {
@@ -59,7 +32,7 @@ class Project {
 			
 			// Skip ignored modules
 			if(!in_array($name, $ignore)) {
-				$modules[] = new Module($this, $name, $dir);
+				$modules[] = new Module($dir, $name, $this);
 			}
 		}
 		return $modules;
