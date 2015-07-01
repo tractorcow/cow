@@ -17,7 +17,7 @@ class Project {
 		$this->directory = realpath($directory);
 		
 		if(!$this->isValid()) {
-			throw new InvalidArgumentException("No project in directory \"".$this->directory."\"");
+			throw new InvalidArgumentException("No project in directory \"{$this->directory}\"");
 		}
 	}
 	
@@ -37,5 +37,31 @@ class Project {
 		if($head instanceof Branch) {
 			return $head->getName();
 		}
+	}
+	
+	/**
+	 * Gets the list of modules in this project
+	 */
+	public function getModules() {
+		$ignore = array('mysite', 'assets', 'vendor');
+		$modules = array();
+		
+		// Include installer
+		$modules[] = new Module($this, 'installer', $this->directory);
+		
+		// Search all directories
+		foreach(glob($this->directory."/*", GLOB_ONLYDIR) as $dir) {
+			// Check for _config
+			if(!is_file("$dir/_config.php") && !is_dir("$dir/_config")) {
+				continue;
+			}
+			$name = basename($dir);
+			
+			// Skip ignored modules
+			if(!in_array($name, $ignore)) {
+				$modules[] = new Module($this, $name, $dir);
+			}
+		}
+		return $modules;
 	}
 }

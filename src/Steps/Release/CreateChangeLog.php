@@ -45,10 +45,14 @@ class CreateChangeLog extends Step {
 		
 		// Check branch
 		$branch = $project->getBranch();
+		$modules = $project->getModules();
 		
 		// Todo - make the changelog
 		var_dump($branch);
 		var_dump($this->from->getValue());
 		var_dump($this->version->getValue());
+		foreach($modules as $module) {
+			var_dump($module->getName());
+		}
 	}
 }
