@@ -17,24 +17,46 @@ class Project extends Module {
 	 * Gets the list of modules in this installer
 	 */
 	public function getModules() {
-		$ignore = array('mysite', 'assets', 'vendor');
-		
 		// Include self as head module
 		$modules = array($this);
 		
 		// Search all directories
 		foreach(glob($this->directory."/*", GLOB_ONLYDIR) as $dir) {
-			// Check for _config
-			if(!is_file("$dir/_config.php") && !is_dir("$dir/_config")) {
-				continue;
-			}
-			$name = basename($dir);
-			
-			// Skip ignored modules
-			if(!in_array($name, $ignore)) {
+			if($this->isModulePath($dir)) {
+				$name = basename($dir);
 				$modules[] = new Module($dir, $name, $this);
 			}
 		}
 		return $modules;
+	}
+
+	/**
+	 * Get a module by name
+	 *
+	 * @param string $name
+	 * @return Module
+	 */
+	public function getModule($name) {
+		$dir = $this->directory . DIRECTORY_SEPARATOR . $name;
+		if($this->isModulePath($dir)) {
+			return new Module($dir, $name, $this);
+		}
+	}
+
+	/**
+	 * Check if the given path contains a module
+	 *
+	 * @return bool
+	 */
+	protected function isModulePath($path) {
+		// Check for _config
+		if(!is_file("$path/_config.php") && !is_dir("$path/_config")) {
+			return false;
+		}
+
+		// Skip ignored modules
+		$name = basename($path);
+		$ignore = array('mysite', 'assets', 'vendor');
+		return !in_array($name, $ignore);
 	}
 }

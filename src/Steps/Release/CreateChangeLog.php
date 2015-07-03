@@ -68,6 +68,8 @@ class CreateChangeLog extends Step {
 		$path = $this->getChangelogPath();
 		$this->writeChangelog($output, $content, $path);
 
+		// Now commit to git (but don't push!)
+		$this->commitChanges($output, $path);
 
 		$this->log($output, "Changelog successfully saved!");
 	}
@@ -143,6 +145,28 @@ class CreateChangeLog extends Step {
 
 	public function getStepName() {
 		return 'changelog';
+	}
+
+	/**
+	 * Commit changes to git
+	 *
+	 * @param OutputInterface $output
+	 * @param type $path
+	 */
+	public function commitChanges(OutputInterface $output, $path) {
+		$this->log($output, 'Committing changes to git');
+
+		// Get framework to commit to
+		$framework = $this->project->getModule('framework');
+		if(!$framework) {
+			throw new Exception("Could not find module framework in project " . $this->project->getDirectory());
+		}
+		$repo = $framework->getRepository();
+
+		// Write changes to git
+		$repo->run("add", array($path));
+		$version = $this->version->getValue();
+		$repo->run("commit", array("-m", "Added {$version} changelog"));
 	}
 
 }
