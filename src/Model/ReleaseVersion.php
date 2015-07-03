@@ -2,6 +2,8 @@
 
 namespace SilverStripe\Cow\Model;
 
+use InvalidArgumentException;
+
 /**
  * Represents a version for a release
  */
@@ -147,7 +149,7 @@ class ReleaseVersion {
 		// If patch version is 0 we really can't guess
 		$patch = $prior->getPatch();
 		if(empty($patch)) {
-			throw new \InvalidArgumentException(
+			throw new InvalidArgumentException(
 				"Can't guess version which comes before " . $this->getValue()
 			);
 		}

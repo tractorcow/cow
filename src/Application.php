@@ -15,7 +15,7 @@ class Application extends Console\Application
         $commands = parent::getDefaultCommands();
 
         $commands[] = new Commands\MooCommand();
-		$commands[] = new Commands\Project\Create();
+		$commands[] = new Commands\Release\Create();
 		$commands[] = new Commands\Release\Changelog();
 		$commands[] = new Commands\Release\Release();
 

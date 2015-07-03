@@ -1,13 +1,14 @@
 <?php
 
-namespace SilverStripe\Cow\Steps\Composer;
+namespace SilverStripe\Cow\Steps\Release;
 
+use Exception;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Step;
-use SilverStripe\Cow\Commands\Command;
-use Symfony\Component\Console\Helper\ProcessHelper;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Exception\InvalidArgumentException;
 
 /**
  * Creates a new project
@@ -84,7 +85,7 @@ class CreateProject extends Step {
 		);
 		$result = $this->runCommand($output, $command);
 		if($result === false) {
-			throw new \Exception("Could not create project with version {$version}");
+			throw new Exception("Could not create project with version {$version}");
 		}
 	}
 
@@ -93,7 +94,7 @@ class CreateProject extends Step {
 	 *
 	 * @param OutputInterface $output
 	 * @return string
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	protected function getBestVersion(OutputInterface $output) {
 		$this->log($output, 'Determining best version to install');
@@ -109,7 +110,7 @@ class CreateProject extends Step {
 			}
 		}
 
-		throw new \InvalidArgumentException("Could not install project from version ".$this->version->getValue());
+		throw new InvalidArgumentException("Could not install project from version ".$this->version->getValue());
 	}
 
 	public function getStepName() {
