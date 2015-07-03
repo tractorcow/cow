@@ -22,12 +22,22 @@ not only the commands available but each of the steps each command contains.
 
 It is normally recommended that you run with `-vvv` verbose flag so that errors can be viewed during release.
 
-### Setup
+## Release
 
-`cow project:create <version> -vvv` Create a new release with the given version. If you don't specify a directory `-d` it will
-install to the path specified by `./release-<version>` in the current directory.
+`cow release <version>` will perform all release tasks. <version> is mandatory and must be the exact tag name to release.
 
-### Changelog
+This command has these options:
 
-`cow release:changelog <version> --from <fromversion> -vvv` Generates a changelog for version <version>, where
-<fromversion> is the starting point of the log history.
+* `-vvv` to ensure all underlying commands are echoed
+* `--from <fromversion>` when generating a changelog, it can be necessary at times to specify the last released version.
+cow will try to guess, but sometimes (e.g. when releasing 3.2.0) it's not clear where the changelog should start.
+* `--directory <directory>` to specify the folder to create or look for this project in. If you don't specify this,
+it will install to the path specified by `./release-<version>` in the current directory.
+
+## Sub-commands
+
+`release` actually has several sub-commands which can be run independently. These are as below:
+
+* `release:changelog` Just generates the changelog and commits this to source control.
+* `release:create` creates the project folder
+
