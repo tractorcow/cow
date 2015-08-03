@@ -5,6 +5,7 @@ namespace SilverStripe\Cow\Commands\Release;
 use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Release\CreateChangeLog;
+use SilverStripe\Cow\Steps\Release\CreateProject;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
@@ -40,6 +41,10 @@ class Release extends Command {
 		$version = $this->getInputVersion();
 		$fromVersion = $this->getInputFromVersion($version);
 		$directory = $this->getInputDirectory($version);
+
+		// Steps
+		$step = new CreateProject($this, $version, $directory);
+		$step->run($this->input, $this->output);
 
 		// Steps
 		$step = new CreateChangeLog($this, $version, $fromVersion, $directory);
