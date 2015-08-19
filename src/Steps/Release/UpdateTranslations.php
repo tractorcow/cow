@@ -48,10 +48,19 @@ class UpdateTranslations extends Step {
 	protected $project;
 
 	/**
+	 * List of module names to translate. 'installer' specifies the core project
 	 *
 	 * @var array
 	 */
 	protected $modules;
+
+	/**
+	 * If true, then $modules is the list of modules that should NOT be translated
+	 * rather than translated.
+	 *
+	 * @var bool
+	 */
+	protected $listIsExclusive;
 
 	/**
 	 * Create a new translation step
@@ -59,11 +68,13 @@ class UpdateTranslations extends Step {
 	 * @param Command $command
 	 * @param string $directory Where to translate
 	 * @param array $modules Optional list of modules to limit translation to
+	 * @param bool $listIsExclusive If this list is exclusive. If false, this is inclusive
 	 */
-	public function __construct(Command $command, $directory, $modules = array()) {
+	public function __construct(Command $command, $directory, $modules = array(), $listIsExclusive = false) {
 		parent::__construct($command);
 
 		$this->modules = $modules;
+		$this->listIsExclusive = $listIsExclusive;
 		$this->project = new Project($directory);
 	}
 
@@ -74,20 +85,12 @@ class UpdateTranslations extends Step {
 		return $this->project;
 	}
 
-	/**
-	 *
-	 * @return array
-	 */
-	public function getModules() {
-		return $this->modules;
-	}
-
 	public function getStepName() {
 		return 'translations';
 	}
 
 	public function run(InputInterface $input, OutputInterface $output) {
-		$modules = $this->getModuleItems($output);
+		$modules = $this->getModules($output);
 		$this->log($output, sprintf("Updating translations for %d module(s)", count($modules)));
 		$this->checkVersion($output);
 		$this->pullSource($output, $modules);
@@ -286,24 +289,30 @@ TMPL;
 	 * @param OutputInterface
 	 * @return Module[]
 	 */
-	protected function getModuleItems(OutputInterface $output) {
+	protected function getModules(OutputInterface $output) {
 		$modules = $this->getProject()->getModules();
-		$filter = $this->getModules();
+		$filter = $this->modules;
+		$listIsExclusive = $this->listIsExclusive;
 
 		// Get only modules with translations
 		$self = $this;
-		return array_filter($modules, function($module) use ($output, $filter, $self) {
+		return array_filter($modules, function($module) use ($output, $filter, $listIsExclusive, $self) {
 			// Automatically skip un-translateable modules
 			if(empty($filter)) {
 				return $module->isTranslatable();
 			}
 			
-			// Skip filtered
+			// If unspecified, include this if the list is exclusive only (and valid)
 			if(!in_array($module->getName(), $filter)) {
+				return $listIsExclusive && $module->isTranslatable();
+			}
+
+			// Skip matching modules if list is exclusive
+			if($listIsExclusive) {
 				return false;
 			}
 
-			// Warn if this module has no translations
+			// Warn if this module was explicitly selected, but has no translations
 			if(!$module->isTranslatable()) {
 				$self->log(
 					$output,

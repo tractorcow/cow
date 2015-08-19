@@ -21,6 +21,7 @@ abstract class Module extends Command {
 			'Optional list of modules to filter (separate by space)'
 		);
 		$this->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Module directory');
+		$this->addOption('exclude', 'e', InputOption::VALUE_NONE, "Makes list of modules exclusive instead of inclusive");
 	}
 
 	/**
@@ -43,5 +44,14 @@ abstract class Module extends Command {
 	 */
 	protected function getInputModules() {
 		return $this->input->getArgument('modules') ?: array();
+	}
+
+	/**
+	 * Check if this list is exclusive. Default to inclusive if not specified
+	 *
+	 * @return bool
+	 */
+	protected function getInputExclude() {
+		return $this->input->getOption('exclude');
 	}
 }

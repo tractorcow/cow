@@ -21,8 +21,9 @@ class Translate extends Module {
 	protected function fire() {
 		$directory = $this->getInputDirectory();
 		$modules = $this->getInputModules();
+		$listIsExclusive = $this->getInputExclude();
 
-		$translate = new UpdateTranslations($this, $directory, $modules);
+		$translate = new UpdateTranslations($this, $directory, $modules, $listIsExclusive);
 		$translate->run($this->input, $this->output);
 		//$step->run($this->input, $this->output);
 	}
