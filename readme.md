@@ -38,6 +38,14 @@ it will install to the path specified by `./release-<version>` in the current di
 
 `release` actually has several sub-commands which can be run independently. These are as below:
 
-* `release:changelog` Just generates the changelog and commits this to source control.
 * `release:create` creates the project folder
+* `release:changelog` Just generates the changelog and commits this to source control.
+* `release:translate` Updates translations and commits this to source control
+
+## Module-level commands
+
+Outside of doing core releases, you can use this for specific modules
+
+* `module:translate <modules>` Updates translations for modules and commits this to source control. If you
+don't specify a list of modules then all modules will be translated. Specify 'installer' for root module.
 

@@ -2,6 +2,8 @@
 
 namespace SilverStripe\Cow\Model;
 
+use InvalidArgumentException;
+
 /**
  * Represents information about a project in a given directory
  * 
@@ -11,10 +13,16 @@ class Project extends Module {
 	
 	public function __construct($directory) {
 		parent::__construct($directory, 'installer');
+
+		if(!realpath($this->directory . '/mysite')) {
+			throw new InvalidArgumentException("No installer found in \"{$this->directory}\"");
+		}
 	}
 	
 	/**
 	 * Gets the list of modules in this installer
+	 *
+	 * @return Module[]
 	 */
 	public function getModules() {
 		// Include self as head module
@@ -44,7 +52,7 @@ class Project extends Module {
 	}
 
 	/**
-	 * Check if the given path contains a module
+	 * Check if the given path contains a non-installer module
 	 *
 	 * @return bool
 	 */
@@ -58,5 +66,13 @@ class Project extends Module {
 		$name = basename($path);
 		$ignore = array('mysite', 'assets', 'vendor');
 		return !in_array($name, $ignore);
+	}
+
+	public function getLangDirectory() {
+		return $this->directory . '/mysite/lang';
+	}
+
+	public function getCodeDirectory() {
+		return 'mysite';
 	}
 }

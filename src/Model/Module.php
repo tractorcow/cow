@@ -51,12 +51,39 @@ class Module {
 	public function getDirectory() {
 		return $this->directory;
 	}
+
+	/**
+	 * Gets the module lang dir
+	 *
+	 * @return string
+	 */
+	public function getLangDirectory() {
+		return $this->directory . '/lang';
+	}
+
+	/**
+	 * Base name only of location of code
+	 *
+	 * @return string
+	 */
+	public function getCodeDirectory() {
+		return $this->getName();
+	}
 	
 	/**
 	 * A project is valid if it has a root composer.json
 	 */
 	public function isValid() {
 		return $this->directory && realpath($this->directory . '/composer.json');
+	}
+
+	/**
+	 * Determine if this project has a .tx configured
+	 *
+	 * @return bool
+	 */
+	public function isTranslatable() {
+		return $this->directory && realpath($this->directory . '/.tx/config');
 	}
 	
 	public function getName() {

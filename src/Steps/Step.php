@@ -24,7 +24,7 @@ abstract class Step {
 
 	abstract public function run(InputInterface $input, OutputInterface $output);
 
-	protected function log(OutputInterface $output, $message, $format = '') {
+	public function log(OutputInterface $output, $message, $format = '') {
 		$name = $this->getStepName();
 		$text = "<bold>[{$name}]</bold> ";
 		if($format) {
