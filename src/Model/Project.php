@@ -68,11 +68,8 @@ class Project extends Module {
 		return !in_array($name, $ignore);
 	}
 
-	public function getLangDirectory() {
-		return $this->directory . '/mysite/lang';
-	}
-
-	public function getCodeDirectory() {
-		return 'mysite';
+	public function getMainDirectory() {
+		// Look in mysite for main content
+		return $this->getDirectory() . '/mysite';
 	}
 }

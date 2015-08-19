@@ -44,7 +44,7 @@ class Module {
 	}
 
 	/**
-	 * Get the directory this module is saved in
+	 * Get the base directory this module is saved in
 	 *
 	 * @return string
 	 */
@@ -58,16 +58,38 @@ class Module {
 	 * @return string
 	 */
 	public function getLangDirectory() {
-		return $this->directory . '/lang';
+		return $this->getMainDirectory() . '/lang';
 	}
 
 	/**
-	 * Base name only of location of code
+	 * Gets the directory(s) of the JS lang folder.
+	 *
+	 * Can be a string or an array result
+	 *
+	 * @return string|array
+	 */
+	public function getJSLangDirectory() {
+		$dir = $this->getMainDirectory() . '/javascript/lang';
+
+		// Special case for framework which has a nested 'admin' submodule
+		if($this->getName() === 'framework') {
+			return array(
+				$this->getMainDirectory() . '/admin/javascript/lang',
+				$dir
+			);
+		} else {
+			return $dir;
+		}
+
+	}
+
+	/**
+	 * Directory where module files exist; Usually the one that sits just below the top level project
 	 *
 	 * @return string
 	 */
-	public function getCodeDirectory() {
-		return $this->getName();
+	public function getMainDirectory() {
+		return $this->getDirectory();
 	}
 	
 	/**
