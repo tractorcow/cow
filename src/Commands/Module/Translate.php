@@ -22,8 +22,9 @@ class Translate extends Module {
 		$directory = $this->getInputDirectory();
 		$modules = $this->getInputModules();
 		$listIsExclusive = $this->getInputExclude();
+		$push = $this->getInputPush();
 
-		$translate = new UpdateTranslations($this, $directory, $modules, $listIsExclusive);
+		$translate = new UpdateTranslations($this, $directory, $modules, $listIsExclusive, $push);
 		$translate->run($this->input, $this->output);
 		//$step->run($this->input, $this->output);
 	}

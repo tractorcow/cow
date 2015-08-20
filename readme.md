@@ -48,4 +48,6 @@ Outside of doing core releases, you can use this for specific modules
 
 * `module:translate <modules>` Updates translations for modules and commits this to source control. If you
 don't specify a list of modules then all modules will be translated. Specify 'installer' for root module.
+You can use `--push` option to push to origin at the end, or `--exclude` if your list of modules is the list
+to exclude. By default all modules are included, unless whitelisted or excluded.
 

@@ -63,19 +63,28 @@ class UpdateTranslations extends Step {
 	protected $listIsExclusive;
 
 	/**
+	 * Flag whether we should do push on each git repo
+	 *
+	 * @var bool
+	 */
+	protected $push;
+
+	/**
 	 * Create a new translation step
 	 *
 	 * @param Command $command
 	 * @param string $directory Where to translate
 	 * @param array $modules Optional list of modules to limit translation to
 	 * @param bool $listIsExclusive If this list is exclusive. If false, this is inclusive
+	 * @param bool $push Do git push at end
 	 */
-	public function __construct(Command $command, $directory, $modules = array(), $listIsExclusive = false) {
+	public function __construct(Command $command, $directory, $modules = array(), $listIsExclusive = false, $doPush = false) {
 		parent::__construct($command);
 
 		$this->modules = $modules;
 		$this->listIsExclusive = $listIsExclusive;
 		$this->project = new Project($directory);
+		$this->push = $doPush;
 	}
 
 	/**
@@ -276,10 +285,23 @@ TMPL;
 			$jsPath = $module->getJSLangDirectory();
 			$langPath = $module->getLangDirectory();
 			foreach(array_merge((array)$jsPath, (array)$langPath) as $path) {
-				$repo->run("add", array($path . "/*"));
+				if(is_dir($path)) {
+					$repo->run("add", array($path . "/*"));
+				}
 			}
-			
-			$repo->run("commit", array("-m", "Update translations"));
+
+			// Commit changes if any exist
+			$status = $repo->run("status");
+			if(stripos($status, 'Changes to be committed:')) {
+				$this->log($output, "Comitting changes for module " . $module->getName());
+				$repo->run("commit", array("-m", "Update translations"));
+			}
+
+			// Do push if selected
+			if($this->push) {
+				$this->log($output, "Pushing upstream for module " . $module->getName());
+				$repo->run("push", array("origin"));
+			}
 		}
 	}
 
