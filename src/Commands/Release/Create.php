@@ -2,7 +2,6 @@
 
 namespace SilverStripe\Cow\Commands\Release;
 
-use InvalidArgumentException;
 use SilverStripe\Cow\Steps\Release\CreateProject;
 
 /**

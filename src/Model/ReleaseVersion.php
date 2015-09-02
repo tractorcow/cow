@@ -92,12 +92,21 @@ class ReleaseVersion {
 	}
 
 	/**
+	 * Get stable version this version is targetting (ignoring rc, beta, etc)
+	 *
+	 * @return string
+	 */
+	public function getValueStable() {
+		return implode('.', array($this->major, $this->minor, $this->patch));
+	}
+
+	/**
 	 * Get version string
 	 *
 	 * @return string
 	 */
 	public function getValue() {
-		$value = implode('.', array($this->major, $this->minor, $this->patch));
+		$value = $this->getValueStable();
 		if($this->stability) {
 			$value .= "-{$this->stability}{$this->stabilityVersion}";
 		}

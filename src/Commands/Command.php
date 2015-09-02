@@ -2,7 +2,6 @@
 
 namespace SilverStripe\Cow\Commands;
 
-use SilverStripe\Cow\Model\ReleaseVersion;
 use Symfony\Component\Console;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;

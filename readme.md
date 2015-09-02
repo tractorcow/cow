@@ -30,15 +30,19 @@ This command has these options:
 
 * `-vvv` to ensure all underlying commands are echoed
 * `--from <fromversion>` when generating a changelog, it can be necessary at times to specify the last released version.
-cow will try to guess, but sometimes (e.g. when releasing 3.2.0) it's not clear where the changelog should start.
+  cow will try to guess, but sometimes (e.g. when releasing 3.2.0) it's not clear where the changelog should start.
 * `--directory <directory>` to specify the folder to create or look for this project in. If you don't specify this,
 it will install to the path specified by `./release-<version>` in the current directory.
+* `--branch <branch>` or just `--branch-auto` will automatically branch each module to a temp branch for this release.
+  If omitted, no branching is performed. `--branch-auto` can be used to just default to the major.minor.patch
+  version of the release. It's advisable to specify this, but not always necessary, when doing pre-releases.
 
 ## Sub-commands
 
 `release` actually has several sub-commands which can be run independently. These are as below:
 
 * `release:create` creates the project folder
+* `release:branch` Will (if needed) branch all modules
 * `release:changelog` Just generates the changelog and commits this to source control.
 * `release:translate` Updates translations and commits this to source control
 

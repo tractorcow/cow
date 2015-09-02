@@ -157,4 +157,14 @@ class Module {
 			return $head->getName();
 		}
 	}
+
+	/**
+	 * Change to another branch, creating it if it doesn't exist
+	 *
+	 * @param string $branch
+	 */
+	public function changeBranch($branch) {
+		$repo = $this->getRepository();
+		$repo->run('checkout', array('-B', $branch));
+	}
 }

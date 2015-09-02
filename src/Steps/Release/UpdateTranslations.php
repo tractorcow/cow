@@ -76,7 +76,7 @@ class UpdateTranslations extends Step {
 	 * @param string $directory Where to translate
 	 * @param array $modules Optional list of modules to limit translation to
 	 * @param bool $listIsExclusive If this list is exclusive. If false, this is inclusive
-	 * @param bool $push Do git push at end
+	 * @param bool $doPush Do git push at end
 	 */
 	public function __construct(Command $command, $directory, $modules = array(), $listIsExclusive = false, $doPush = false) {
 		parent::__construct($command);

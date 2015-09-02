@@ -26,7 +26,6 @@ class Translate extends Module {
 
 		$translate = new UpdateTranslations($this, $directory, $modules, $listIsExclusive, $push);
 		$translate->run($this->input, $this->output);
-		//$step->run($this->input, $this->output);
 	}
 
 }

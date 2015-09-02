@@ -4,8 +4,10 @@ namespace SilverStripe\Cow\Commands\Release;
 
 use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Model\ReleaseVersion;
+use SilverStripe\Cow\Steps\Release\CreateBranch;
 use SilverStripe\Cow\Steps\Release\CreateChangeLog;
 use SilverStripe\Cow\Steps\Release\CreateProject;
+use SilverStripe\Cow\Steps\Release\UpdateTranslations;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
@@ -17,13 +19,11 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
  */
 class Release extends Command {
 	
-	/**
-	 *
-	 * @var string
-	 */
 	protected $name = 'release';
 	
 	protected $description = 'Execute each release step in order to publish a new version';
+
+	const BRANCH_AUTO = 'auto';
 	
 	protected function configure() {
 		parent::configure();
@@ -32,7 +32,9 @@ class Release extends Command {
 			->addArgument('version', InputArgument::REQUIRED, 'Exact version tag to release this project as')
 			->addOption('from', 'f', InputOption::VALUE_REQUIRED, 'Version to generate changelog from')
 			->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to release project from')
-			->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project');
+			->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project')
+			->addOption('branch', 'b', InputOption::VALUE_REQUIRED, 'Branch each module to this')
+			->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch');
 	}
 	
 	
@@ -41,14 +43,22 @@ class Release extends Command {
 		$version = $this->getInputVersion();
 		$fromVersion = $this->getInputFromVersion($version);
 		$directory = $this->getInputDirectory($version);
+		$branch = $this->getInputBranch($version);
 
 		// Steps
-		$step = new CreateProject($this, $version, $directory);
-		$step->run($this->input, $this->output);
+		$steps = array(
+			new CreateProject($this, $version, $directory),
+			new CreateBranch($this, $directory, $branch),
+			new UpdateTranslations($this, $directory),
+			new CreateChangeLog($this, $version, $fromVersion, $directory)
+		);
 
-		// Steps
-		$step = new CreateChangeLog($this, $version, $fromVersion, $directory);
-		$step->run($this->input, $this->output);
+		// Run
+		foreach($steps as $step) {
+			if($step) {
+				$step->run($this->input, $this->output);
+			}
+		}
 	}
 
 	/**
@@ -60,6 +70,25 @@ class Release extends Command {
 		// Version
 		$value = $this->input->getArgument('version');
 		return new ReleaseVersion($value);
+	}
+
+	/**
+	 * Determine the branch name that should be used
+	 *
+	 * @param ReleaseVersion $version
+	 * @return string|null
+	 */
+	protected function getInputBranch(ReleaseVersion $version) {
+		$branch = $this->input->getOption('branch');
+		if($branch) {
+			return $branch;
+		}
+
+		// If not explicitly specified, automatically select
+		if($this->input->getOption('branch-auto')) {
+			return $version->getValueStable();
+		}
+		return null;
 	}
 
 	/**
