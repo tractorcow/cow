@@ -7,6 +7,8 @@ use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Release\CreateBranch;
 use SilverStripe\Cow\Steps\Release\CreateChangeLog;
 use SilverStripe\Cow\Steps\Release\CreateProject;
+use SilverStripe\Cow\Steps\Release\PushRelease;
+use SilverStripe\Cow\Steps\Release\TagModules;
 use SilverStripe\Cow\Steps\Release\UpdateTranslations;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -47,10 +49,24 @@ class Release extends Command {
 
 		// Steps
 		$steps = array(
+			// Make the directory
 			new CreateProject($this, $version, $directory),
+			// Change to the correct temp branch (if given)
 			new CreateBranch($this, $directory, $branch),
+			// Update all translations
 			new UpdateTranslations($this, $directory),
-			new CreateChangeLog($this, $version, $fromVersion, $directory)
+			// Run tests
+			// @todo
+			// Generate changelog
+			new CreateChangeLog($this, $version, $fromVersion, $directory),
+			// Tag
+			new TagModules($this, $version, $directory),
+			// Push tag & branch
+			new PushRelease($this, $directory)
+			// Create packages
+			// @todo
+			// Upload
+			// @todo
 		);
 
 		// Run

@@ -22,6 +22,13 @@ not only the commands available but each of the steps each command contains.
 
 It is normally recommended that you run with `-vvv` verbose flag so that errors can be viewed during release.
 
+For example, this is what I would run to release `3.1.14-rc1`, assuming there wasn't a 3.1.14 branch and I wanted
+to create one for the RC release.
+
+```
+cow release 3.1.14-rc1 -vvv --from=3.1.13 --branch-auto
+```
+
 ## Release
 
 `cow release <version>` will perform all release tasks. <version> is mandatory and must be the exact tag name to release.
@@ -43,8 +50,10 @@ it will install to the path specified by `./release-<version>` in the current di
 
 * `release:create` creates the project folder
 * `release:branch` Will (if needed) branch all modules
-* `release:changelog` Just generates the changelog and commits this to source control.
 * `release:translate` Updates translations and commits this to source control
+* `release:changelog` Just generates the changelog and commits this to source control.
+* `release:tag` Add annotated tags to each module
+* `release:push` Push branch and tag up to origin
 
 ## Module-level commands
 

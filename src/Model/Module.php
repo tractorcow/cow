@@ -167,4 +167,38 @@ class Module {
 		$repo = $this->getRepository();
 		$repo->run('checkout', array('-B', $branch));
 	}
+
+	/**
+	 * Tag this module
+	 *
+	 * @param string $tag
+	 */
+	public function addTag($tag) {
+		$repo = $this->getRepository();
+		$repo->run('tag', array('-a', $tag, '-m', "Release {$tag}"));
+	}
+
+	/**
+	 * Push this branch to the given remote
+	 *
+	 * @param string $remote
+	 * @param bool $tags Push tags?
+	 */
+	public function pushTo($remote = 'origin', $tags = false) {
+		// Validate branch
+		$branch = $this->getBranch();
+		if(!$branch) {
+			throw new Exception("Module " . $this->getName() . " cannot push without a current branch");
+		}
+
+		// Check options
+		$repo = $this->getRepository();
+		$args = array($remote, $branch);
+		if($tags) {
+			$args[] = '--follow-tags';
+		}
+
+		// Push
+		$repo->run('push', $args);
+	}
 }
