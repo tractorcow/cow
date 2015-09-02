@@ -36,7 +36,8 @@ class Release extends Command {
 			->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to release project from')
 			->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project')
 			->addOption('branch', 'b', InputOption::VALUE_REQUIRED, 'Branch each module to this')
-			->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch');
+			->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch')
+			->addOption('aws-profile', null, InputOption::VALUE_REQUIRED, "AWS profile to use for upload", "silverstripe");
 	}
 	
 	
@@ -46,6 +47,7 @@ class Release extends Command {
 		$fromVersion = $this->getInputFromVersion($version);
 		$directory = $this->getInputDirectory($version);
 		$branch = $this->getInputBranch($version);
+		$awsProfile = $this->getInputAWSProfile();
 
 		// Steps
 		$steps = array(
@@ -60,13 +62,13 @@ class Release extends Command {
 			// Generate changelog
 			new CreateChangeLog($this, $version, $fromVersion, $directory),
 			// Tag
-			new TagModules($this, $version, $directory),
+			/* new TagModules($this, $version, $directory), */ // Run this manually for now via release:tag
 			// Push tag & branch
-			new PushRelease($this, $directory)
+			/* new PushRelease($this, $directory) */ // Run this manually for now via release:push
 			// Create packages
 			// @todo
 			// Upload
-			// @todo
+			/* new UploadArchive($this, $version, $directory, $awsProfile) */ // Run this manually for now via release:upload
 		);
 
 		// Run
@@ -86,6 +88,15 @@ class Release extends Command {
 		// Version
 		$value = $this->input->getArgument('version');
 		return new ReleaseVersion($value);
+	}
+
+	/**
+	 * Get the aws profile to use
+	 *
+	 * @return silverstripe
+	 */
+	public function getInputAWSProfile() {
+		return $this->input->getOption('aws-profile');
 	}
 
 	/**

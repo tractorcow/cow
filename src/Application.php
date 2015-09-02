@@ -24,6 +24,7 @@ class Application extends Console\Application
 		$commands[] = new Commands\Release\Changelog();
 		$commands[] = new Commands\Release\Tag();
 		$commands[] = new Commands\Release\Push();
+		$commands[] = new Commands\Release\Upload();
 
 		// Base release command
 		$commands[] = new Commands\Release\Release();

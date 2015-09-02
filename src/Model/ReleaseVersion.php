@@ -167,4 +167,32 @@ class ReleaseVersion {
 		$prior->setPatch($patch - 1);
 		return $prior;
 	}
+
+	/**
+	 * Get all filenames
+	 *
+	 * @return string
+	 */
+	public function getReleaseFilenames() {
+		$names = array();
+		foreach(array(false, true) as $includeCMS) {
+			foreach(array('.zip', '.tar.gz') as $extension) {
+				$names[] = $this->getReleaseFilename($includeCMS, $extension);
+			}
+		}
+		return $names;
+	}
+
+	/**
+	 * For this version, generate the filename
+	 *
+	 * @param bol $includeCMS Does this include CMS?
+	 * @param string $extension archive extension (including period)
+	 * @return string
+	 */
+	public function getReleaseFilename($includeCMS = true, $extension = '.tar.gz') {
+		$type = $includeCMS ? 'cms' : 'framework';
+		$version = $this->getValue();
+		return "SilverStripe-{$type}-v{$version}{$extension}";
+	}
 }

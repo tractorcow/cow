@@ -13,6 +13,9 @@ echo 'export PATH=$PATH:~/.composer/vendor/bin/'  >> ~/.bash_profile
 
 Now you can run `cow` at any time, and `composer global update` to perform time-to-time upgrades.
 
+Make sure that you setup your AWS credentials properly, and create a separate profile named `silverstripe`
+for this. You'll also need the aws cli installed.
+
 If you're feeling lonely, or just want to test your install, you can run `cow moo`.
 
 ## Commands
@@ -54,6 +57,7 @@ it will install to the path specified by `./release-<version>` in the current di
 * `release:changelog` Just generates the changelog and commits this to source control.
 * `release:tag` Add annotated tags to each module
 * `release:push` Push branch and tag up to origin
+* `release:upload` Upload archived projects to silverstripe.org
 
 ## Module-level commands
 

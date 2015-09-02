@@ -64,12 +64,15 @@ class CreateBranch extends Step {
 			return;
 		}
 
-		$this->log($output, "Branching all modules to {$branch}");
+		$this->log($output, "Branching all modules to <info>{$branch}</info>");
 		$modules = $this->getProject()->getModules();
 		foreach($modules as $module) {
 			$thisBranch = $module->getBranch();
 			if($thisBranch != $branch) {
-				$this->log($output, "Branching module ".$module->getName()." from {$thisBranch} to {$branch}");
+				$this->log(
+					$output,
+					"Branching module ".$module->getName()." from <info>{$thisBranch}</info> to <info>{$branch}</info>"
+				);
 				$module->changeBranch($branch);
 			}
 		}

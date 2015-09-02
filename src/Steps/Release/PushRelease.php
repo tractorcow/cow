@@ -48,7 +48,7 @@ class PushRelease extends Step {
 		$this->log($output, "Pushing all modules to origin");
 		$modules = $this->getProject()->getModules();
 		foreach($modules as $module) {
-			$this->log($output, "Pushing module " . $module->getName());
+			$this->log($output, "Pushing module <info>" . $module->getName() . "</info>");
 			$module->pushTo('origin', true);
 		}
 		$this->log($output, 'Branching complete');
