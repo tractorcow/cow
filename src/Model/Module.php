@@ -193,7 +193,7 @@ class Module {
 
 		// Check options
 		$repo = $this->getRepository();
-		$args = array($remote, $branch);
+		$args = array($remote, "refs/heads/{$branch}");
 		if($tags) {
 			$args[] = '--follow-tags';
 		}

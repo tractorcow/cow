@@ -3,6 +3,7 @@
 namespace SilverStripe\Cow\Steps\Release;
 
 use Exception;
+use SilverStripe\Cow\Model\Project;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Step;
 use Symfony\Component\Console\Command\Command;
@@ -50,6 +51,12 @@ class CreateProject extends Step {
 	 * @param OutputInterface $output
 	 */
 	public function run(InputInterface $input, OutputInterface $output) {
+		// Check if output directory already exists
+		if(Project::exists_in($this->directory)) {
+			$this->log($output, "Project already exists in target directory. Skipping project creation", "error");
+			return;
+		}
+
 		// Pick and install this version
 		$version = $this->getBestVersion($output);
 		$this->installVersion($output, $version);

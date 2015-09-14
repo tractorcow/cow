@@ -14,9 +14,19 @@ class Project extends Module {
 	public function __construct($directory) {
 		parent::__construct($directory, 'installer');
 
-		if(!realpath($this->directory . '/mysite')) {
+		if(!self::exists_in($this->directory)) {
 			throw new InvalidArgumentException("No installer found in \"{$this->directory}\"");
 		}
+	}
+
+	/**
+	 * Is there a project in the given directory?
+	 *
+	 * @param string $directory
+	 * @return bool
+	 */
+	public static function exists_in($directory) {
+		return file_exists($directory . '/mysite');
 	}
 	
 	/**

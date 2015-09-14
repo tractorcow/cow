@@ -69,6 +69,8 @@ class Release extends Command {
 			// @todo
 			// Upload
 			/* new UploadArchive($this, $version, $directory, $awsProfile) */ // Run this manually for now via release:upload
+			// Merge temp branch back into main
+			// @todo (or just do manually? maybe output some manual instructions here)
 		);
 
 		// Run
