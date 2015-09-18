@@ -7,8 +7,9 @@ use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Release\CreateBranch;
 use SilverStripe\Cow\Steps\Release\CreateChangeLog;
 use SilverStripe\Cow\Steps\Release\CreateProject;
-use SilverStripe\Cow\Steps\Release\PushRelease;
-use SilverStripe\Cow\Steps\Release\TagModules;
+//use SilverStripe\Cow\Steps\Release\PushRelease;
+//use SilverStripe\Cow\Steps\Release\TagModules;
+use SilverStripe\Cow\Steps\Release\RunTests;
 use SilverStripe\Cow\Steps\Release\UpdateTranslations;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -62,7 +63,8 @@ class Release extends Command {
 		$translate->run($this->input, $this->output);
 		
 		// Run tests
-		// @todo
+		$test = new RunTests($this, $directory);
+		$test->run($this->input, $this->output);
 
 		// Generate changelog
 		$changelogs = new CreateChangeLog($this, $version, $fromVersion, $directory);

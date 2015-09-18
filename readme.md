@@ -55,6 +55,7 @@ it will install to the path specified by `./release-<version>` in the current di
 * `release:branch` Will (if needed) branch all modules
 * `release:translate` Updates translations and commits this to source control
 * `release:changelog` Just generates the changelog and commits this to source control.
+* `release:test` Run unit tests
 * `release:tag` Add annotated tags to each module
 * `release:push` Push branch and tag up to origin
 * `release:upload` Upload archived projects to silverstripe.org
