@@ -49,36 +49,35 @@ class Release extends Command {
 		$branch = $this->getInputBranch($version);
 		$awsProfile = $this->getInputAWSProfile();
 
-		// Steps
-		$steps = array(
-			// Make the directory
-			new CreateProject($this, $version, $directory),
-			// Change to the correct temp branch (if given)
-			new CreateBranch($this, $directory, $branch),
-			// Update all translations
-			new UpdateTranslations($this, $directory),
-			// Run tests
-			// @todo
-			// Generate changelog
-			new CreateChangeLog($this, $version, $fromVersion, $directory),
-			// Tag
-			/* new TagModules($this, $version, $directory), */ // Run this manually for now via release:tag
-			// Push tag & branch
-			/* new PushRelease($this, $directory) */ // Run this manually for now via release:push
-			// Create packages
-			// @todo
-			// Upload
-			/* new UploadArchive($this, $version, $directory, $awsProfile) */ // Run this manually for now via release:upload
-			// Merge temp branch back into main
-			// @todo (or just do manually? maybe output some manual instructions here)
-		);
+		// Make the directory
+		$project = new CreateProject($this, $version, $directory);
+		$project->run($this->input, $this->output);
 
-		// Run
-		foreach($steps as $step) {
-			if($step) {
-				$step->run($this->input, $this->output);
-			}
-		}
+		// Change to the correct temp branch (if given)
+		$branch = new CreateBranch($this, $directory, $branch);
+		$branch->run($this->input, $this->output);
+		
+		// Update all translations
+		$translate = new UpdateTranslations($this, $directory);
+		$translate->run($this->input, $this->output);
+		
+		// Run tests
+		// @todo
+
+		// Generate changelog
+		$changelogs = new CreateChangeLog($this, $version, $fromVersion, $directory);
+		$changelogs->run($this->input, $this->output);
+		
+		// Tag
+		/* new TagModules($this, $version, $directory), */ // Run this manually for now via release:tag
+		// Push tag & branch
+		/* new PushRelease($this, $directory) */ // Run this manually for now via release:push
+		// Create packages
+		// @todo
+		// Upload
+		/* new UploadArchive($this, $version, $directory, $awsProfile) */ // Run this manually for now via release:upload
+		// Merge temp branch back into main
+		// @todo (or just do manually? maybe output some manual instructions here)
 	}
 
 	/**
