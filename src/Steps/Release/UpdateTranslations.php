@@ -84,13 +84,10 @@ class UpdateTranslations extends ModuleStep {
 	 * @throws InvalidArgumentException
 	 */
 	protected function checkVersion(OutputInterface $output) {
-		$result = $this->runCommand($output, array("tx", "--version"));
+		$error = "translate requires transifex {$this->txVersion} at least. Run 'pip install transifex-client==0.11b3' to update.";
+		$result = $this->runCommand($output, array("tx", "--version"), $error);
 		if(!version_compare($result, $this->txVersion, '<')) {
-			throw new InvalidArgumentException(
-				"translate requires transifex {$this->txVersion} at least. "
-					."Run 'pip install transifex-client==0.11b3' to update. "
-					."Current version: ".$result
-			);
+			throw new InvalidArgumentException($error ." Current version: ".$result);
 		}
 
 		$this->log($output, "Using transifex CLI version: $result");
@@ -144,7 +141,7 @@ class UpdateTranslations extends ModuleStep {
 			$this->getProject()->getDirectory(),
 			implode(',', $dirs)
 		);
-		$this->runCommand($output, $sakeCommand);
+		$this->runCommand($output, $sakeCommand, "Error encountered running i18nTextCollectorTask");
 	}
 
 	/**
@@ -235,7 +232,7 @@ TMPL;
 				'(cd %s && tx push -s)',
 				$module->getDirectory()
 			);
-			$this->runCommand($output, $pushCommand);
+			$this->runCommand($output, $pushCommand, "Error pushing module {$module} to origin");
 		}
 	}
 	

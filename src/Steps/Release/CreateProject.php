@@ -69,14 +69,15 @@ class CreateProject extends Step {
 	 * @return array
 	 */
 	protected function getAvailableVersions(OutputInterface $output) {
-        $output = $this->runCommand($output, array("composer", "show", $this->package));
+		$error = "Could not parse available versions from command \"composer show {$this->package}\"";
+        $output = $this->runCommand($output, array("composer", "show", $this->package), $error);
 
 		// Parse output
 		if($output && preg_match('/^versions\s*:\s*(?<versions>(\S.+\S))\s*$/m', $output, $matches)) {
 			return preg_split('/\s*,\s*/', $matches['versions']);
 		}
 
-		throw new Exception("Could not parse available versions from command \"composer show {$this->package}\"");
+		throw new Exception($error);
 	}
 
 	/**
@@ -90,10 +91,7 @@ class CreateProject extends Step {
 		$command = array(
 			"composer", "create-project", "--prefer-source", "--keep-vcs", $this->package, $this->directory, $version
 		);
-		$result = $this->runCommand($output, $command);
-		if($result === false) {
-			throw new Exception("Could not create project with version {$version}");
-		}
+		$this->runCommand($output, $command, "Could not create project with version {$version}");
 	}
 
 	/**

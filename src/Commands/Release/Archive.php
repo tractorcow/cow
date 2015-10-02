@@ -1,0 +1,31 @@
+<?php
+
+namespace SilverStripe\Cow\Commands\Release;
+
+use SilverStripe\Cow\Steps\Release\BuildArchive;
+
+/**
+ * Create archives
+ *
+ * @author dmooyman
+ */
+class Archive extends Release {
+
+	/**
+	 *
+	 * @var string
+	 */
+	protected $name = 'release:archive';
+
+	protected $description = 'Create archives for the release in tar.gz and zip formats';
+
+	protected function fire() {
+		// Get arguments
+		$version = $this->getInputVersion();
+		$directory = $this->getInputDirectory($version);
+
+		// Steps
+		$step = new BuildArchive($this, $version, $directory);
+		$step->run($this->input, $this->output);
+	}
+}

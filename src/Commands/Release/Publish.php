@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Cow\Commands\Release;
 
+use SilverStripe\Cow\Steps\Release\BuildArchive;
 use SilverStripe\Cow\Steps\Release\PushRelease;
 use SilverStripe\Cow\Steps\Release\TagModules;
 use SilverStripe\Cow\Steps\Release\UploadArchive;
@@ -37,13 +38,13 @@ class Publish extends Release {
 		$tag = new TagModules($this, $version, $directory, $modules);
 		$tag->run($this->input, $this->output);
 		
-
 		// Push tag & branch
 		$push = new PushRelease($this, $directory, $modules);
 		$push->run($this->input, $this->output);
 
 		// Create packages
-		// @todo
+		$package = new BuildArchive($this, $version, $directory);
+		$package->run($this->input, $this->output);
 
 		// Upload
 		$upload = new UploadArchive($this, $version, $directory, $awsProfile);

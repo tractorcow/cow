@@ -39,9 +39,6 @@ class RunTests extends Step {
 	public function run(InputInterface $input, OutputInterface $output) {
 		$directory = $this->project->getDirectory();
 		$this->log($output, "Running unit tests in <info>{$directory}</info>");
-		$result = $this->runCommand($output, "cd $directory && vendor/bin/phpunit");
-		if($result === false) {
-			throw new Exception("Tests failed!");
-		}
+		$this->runCommand($output, "cd $directory && vendor/bin/phpunit", "Tests failed!");
 	}
 }

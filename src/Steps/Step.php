@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Cow\Steps;
 
+use Exception;
 use SilverStripe\Cow\Commands\Command;
 use Symfony\Component\Console\Helper\ProcessHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,9 +52,10 @@ abstract class Step {
 	 * @param OutputInterface $output
 	 * @param string|array|Process $command An instance of Process or an array of arguments to escape and run or a command to run
 	 * @param string|null $error An error message that must be displayed if something went wrong
+	 * @param bool $exceptionOnError If an error occurs, this message is an exception rather than a notice
 	 * @return string|bool Output, or false if error
 	 */
-	protected function runCommand(OutputInterface $output, $command, $error = null) {
+	protected function runCommand(OutputInterface $output, $command, $error = null, $exceptionOnError = true) {
 		$helper = $this->getProcessHelper();
 
 		// Prepare unbound command
@@ -73,6 +75,10 @@ abstract class Step {
 		if($result->isSuccessful()) {
 			return $result->getOutput();
 		} else {
+			if($exceptionOnError) {
+				$error = $error ?: "Command did not run successfully";
+				throw new Exception($error);
+			}
 			return false;
 		}
 	}

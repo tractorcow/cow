@@ -86,7 +86,8 @@ class UploadArchive extends Step {
 			// Run this
 			$this->runCommand(
 				$output,
-				array("aws", "s3", "cp", $from, $to, "--acl", "public-read", "--profile", $awsProfile)
+				array("aws", "s3", "cp", $from, $to, "--acl", "public-read", "--profile", $awsProfile),
+				"Error copying release {$filename} to s3"
 			);
 		}
 		$this->log($output, 'Upload complete');
