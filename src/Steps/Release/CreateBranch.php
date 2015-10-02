@@ -3,20 +3,13 @@
 namespace SilverStripe\Cow\Steps\Release;
 
 use SilverStripe\Cow\Commands\Command;
-use SilverStripe\Cow\Model\Project;
-use SilverStripe\Cow\Steps\Step;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Branch each module to a new temp branch (unless it's already on that branch)
  */
-class CreateBranch extends Step {
-
-	/**
-	 * @var Project
-	 */
-	protected $project;
+class CreateBranch extends ModuleStep {
 
 	/**
 	 * Branch name
@@ -31,19 +24,13 @@ class CreateBranch extends Step {
 	 * @param Command $command
 	 * @param string $directory Where to translate
 	 * @param string|null $branch Branch name, if necessary
+	 * @param array $modules Optional list of modules to limit to
+	 * @param bool $listIsExclusive If this list is exclusive. If false, this is inclusive
 	 */
-	public function __construct(Command $command, $directory, $branch) {
-		parent::__construct($command);
+	public function __construct(Command $command, $directory, $branch, $modules = array(), $listIsExclusive = false) {
+		parent::__construct($command, $directory, $modules, $listIsExclusive);
 
-		$this->project = new Project($directory);
 		$this->branch = $branch;
-	}
-
-	/**
-	 * @return Project
-	 */
-	public function getProject() {
-		return $this->project;
 	}
 
 	/**
@@ -65,8 +52,7 @@ class CreateBranch extends Step {
 		}
 
 		$this->log($output, "Branching all modules to <info>{$branch}</info>");
-		$modules = $this->getProject()->getModules();
-		foreach($modules as $module) {
+		foreach($this->getModules() as $module) {
 			$thisBranch = $module->getBranch();
 			if($thisBranch != $branch) {
 				$this->log(

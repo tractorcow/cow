@@ -12,7 +12,6 @@ use SilverStripe\Cow\Steps\Release\PushRelease;
 class Push extends Release {
 
 	/**
-	 *
 	 * @var string
 	 */
 	protected $name = 'release:push';
@@ -23,9 +22,10 @@ class Push extends Release {
 		// Get arguments
 		$version = $this->getInputVersion();
 		$directory = $this->getInputDirectory($version);
+		$modules = $this->getReleaseModules($directory);
 
 		// Steps
-		$step = new PushRelease($this, $directory);
+		$step = new PushRelease($this, $directory, $modules);
 		$step->run($this->input, $this->output);
 	}
 }

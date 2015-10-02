@@ -6,22 +6,30 @@ namespace SilverStripe\Cow\Model;
  * A changelog which can be generated from a project
  */
 class ChangeLog {
-	
+
 	/**
-	 * @var Project
+	 * List of source modules
+	 *
+	 * @var Module[]
 	 */
-	protected $project;
+	protected $modules;
 
 	/**
 	 * @var ReleaseVersion
 	 */
 	protected $fromVersion;
-	
-	public function __construct(Project $project, ReleaseVersion $fromVersion) {
-		$this->project = $project;
+
+	/**
+	 * Create a new changelog
+	 *
+	 * @param array $modules Source of modules to generate changelog from
+	 * @param ReleaseVersion $fromVersion
+	 */
+	public function __construct(array $modules, ReleaseVersion $fromVersion) {
+		$this->modules = $modules;
 		$this->fromVersion = $fromVersion;
 	}
-	
+
 	/**
 	 * Get the list of changes for this module
 	 * 
@@ -44,32 +52,16 @@ class ChangeLog {
 			}
 		}
 		return $items;
-		/*
-		
-		$format = "--pretty=tformat:\"message:%s|||author:%aN|||abbrevhash:%h|||hash:%H|||date:%ad|||timestamp:%at\"";
-		$log = $this->exec("git log $format --date=short {$range}", true);
-		
-		
-		$this->log(sprintf('Changing to directory "%s"', $path), Project::MSG_INFO);
-
-		chdir("$this->baseDir/$path");  //switch to the module's path
-
-		// Internal serialization format, ideally this would be JSON but we can't escape characters in git logs.
-		$log = $this->exec("git log --pretty=tformat:\"message:%s|||author:%aN|||abbrevhash:%h|||hash:%H|||date:%ad|||timestamp:%at\" --date=short {$range}", true);
-
-		chdir($this->baseDir);  //switch the working directory back
-
-		return $log;*/
 	}
 
 	/**
 	 * Get all changes grouped by type
+	 *
+	 * @return array
 	 */
 	protected function getGroupedChanges() {
-		$modules = $this->project->getModules();
-
 		$changes = array();
-		foreach($modules as $module) {
+		foreach($this->getModules() as $module) {
 			$moduleChanges = $this->getModuleLog($module);
 			$changes = array_merge($changes, $moduleChanges);
 		}
@@ -101,9 +93,7 @@ class ChangeLog {
 
 		return $output;
 	}
-	
-	
-		
+
 	/**
 	 * Sort and filter this list of commits into a grouped array of commits
 	 *
@@ -140,5 +130,14 @@ class ChangeLog {
 		}
 
 		return $groupedByType;
+	}
+
+	/**
+	 * Get modules for this changelog
+	 *
+	 * @return Module[]
+	 */
+	protected function getModules() {
+		return $this->modules;
 	}
 }

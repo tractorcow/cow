@@ -23,9 +23,10 @@ class Tag extends Release {
 		// Get arguments
 		$version = $this->getInputVersion();
 		$directory = $this->getInputDirectory($version);
+		$modules = $this->getReleaseModules($directory);
 
 		// Steps
-		$step = new TagModules($this, $version, $directory);
+		$step = new TagModules($this, $version, $directory, $modules);
 		$step->run($this->input, $this->output);
 	}
 }

@@ -21,4 +21,6 @@ class MooCommand extends Command
     {
         $this->output->writeln("moo");
     }
+
+	public function configureOptions() { }
 }

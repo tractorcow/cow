@@ -7,6 +7,10 @@ use Symfony\Component\Console;
 
 class Application extends Console\Application
 {
+	public function getLongVersion() {
+		return '<info>cow release tool</info>';
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -27,8 +31,9 @@ class Application extends Console\Application
 		$commands[] = new Commands\Release\Push();
 		$commands[] = new Commands\Release\Upload();
 
-		// Base release command
+		// Base release commands
 		$commands[] = new Commands\Release\Release();
+		$commands[] = new Commands\Release\Publish();
 
 		// Module commands
 		$commands[] = new Commands\Module\Translate();

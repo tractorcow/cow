@@ -19,9 +19,10 @@ class Translate extends Release {
 		// Get arguments
 		$version = $this->getInputVersion();
 		$directory = $this->getInputDirectory($version);
+		$modules = $this->getReleaseModules($directory);
 
 		// Steps
-		$step = new UpdateTranslations($this, $directory);
+		$step = new UpdateTranslations($this, $directory, $modules);
 		$step->run($this->input, $this->output);
 	}
 

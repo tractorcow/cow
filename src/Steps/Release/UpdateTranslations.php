@@ -5,8 +5,6 @@ namespace SilverStripe\Cow\Steps\Release;
 use InvalidArgumentException;
 use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Model\Module;
-use SilverStripe\Cow\Model\Project;
-use SilverStripe\Cow\Steps\Step;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -26,7 +24,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *      `tx push -s`
  *  - Commit changes to source control (without push)
  */
-class UpdateTranslations extends Step {
+class UpdateTranslations extends ModuleStep {
 
 	/**
 	 * Min tx client version
@@ -41,26 +39,6 @@ class UpdateTranslations extends Step {
 	 * @var int
 	 */
 	protected $txMinimumPerc = 10;
-
-	/**
-	 * @var Project
-	 */
-	protected $project;
-
-	/**
-	 * List of module names to translate. 'installer' specifies the core project
-	 *
-	 * @var array
-	 */
-	protected $modules;
-
-	/**
-	 * If true, then $modules is the list of modules that should NOT be translated
-	 * rather than translated.
-	 *
-	 * @var bool
-	 */
-	protected $listIsExclusive;
 
 	/**
 	 * Flag whether we should do push on each git repo
@@ -79,19 +57,8 @@ class UpdateTranslations extends Step {
 	 * @param bool $doPush Do git push at end
 	 */
 	public function __construct(Command $command, $directory, $modules = array(), $listIsExclusive = false, $doPush = false) {
-		parent::__construct($command);
-
-		$this->modules = $modules;
-		$this->listIsExclusive = $listIsExclusive;
-		$this->project = new Project($directory);
+		parent::__construct($command, $directory, $modules, $listIsExclusive);
 		$this->push = $doPush;
-	}
-
-	/**
-	 * @return Project
-	 */
-	public function getProject() {
-		return $this->project;
 	}
 
 	public function getStepName() {
@@ -99,7 +66,7 @@ class UpdateTranslations extends Step {
 	}
 
 	public function run(InputInterface $input, OutputInterface $output) {
-		$modules = $this->getModules($output);
+		$modules = $this->getModules();
 		$this->log($output, sprintf("Updating translations for %d module(s)", count($modules)));
 		$this->checkVersion($output);
 		$this->pullSource($output, $modules);
@@ -112,6 +79,9 @@ class UpdateTranslations extends Step {
 
 	/**
 	 * Test that tx tool is installed
+	 * 
+	 * @param OutputInterface $output
+	 * @throws InvalidArgumentException
 	 */
 	protected function checkVersion(OutputInterface $output) {
 		$result = $this->runCommand($output, array("tx", "--version"));
@@ -308,43 +278,15 @@ TMPL;
 	/**
 	 * Get the list of module objects to translate
 	 *
-	 * @param OutputInterface
 	 * @return Module[]
 	 */
-	protected function getModules(OutputInterface $output) {
-		$modules = $this->getProject()->getModules();
-		$filter = $this->modules;
-		$listIsExclusive = $this->listIsExclusive;
-
+	protected function getModules() {
+		$modules = parent::getModules();
+		
 		// Get only modules with translations
-		$self = $this;
-		return array_filter($modules, function($module) use ($output, $filter, $listIsExclusive, $self) {
+		return array_filter($modules, function(Module $module) {
 			// Automatically skip un-translateable modules
-			if(empty($filter)) {
-				return $module->isTranslatable();
-			}
-			
-			// If unspecified, include this if the list is exclusive only (and valid)
-			if(!in_array($module->getName(), $filter)) {
-				return $listIsExclusive && $module->isTranslatable();
-			}
-
-			// Skip matching modules if list is exclusive
-			if($listIsExclusive) {
-				return false;
-			}
-
-			// Warn if this module was explicitly selected, but has no translations
-			if(!$module->isTranslatable()) {
-				$self->log(
-					$output,
-					sprintf("Selected module %s has no .tx/config directory", $module->getName()),
-					"error"
-				);
-				return false;
-			}
-
-			return true;
+			return $module->isTranslatable();
 		});
 	}
 }

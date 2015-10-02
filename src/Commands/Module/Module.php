@@ -13,8 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
  */
 abstract class Module extends Command {
 	
-	protected function configure() {
-		parent::configure();
+	protected function configureOptions() {
 		$this->addArgument(
 			'modules',
 			InputArgument::IS_ARRAY | InputArgument::OPTIONAL,

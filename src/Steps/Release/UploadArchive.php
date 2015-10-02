@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Push up changes to github for each module (including tags)
+ * Upload tar.gz / zip release archives to ss.org
  *
  * @author dmooyman
  */

@@ -24,9 +24,10 @@ class ChangeLog extends Release {
 		$version = $this->getInputVersion();
 		$fromVersion = $this->getInputFromVersion($version);
 		$directory = $this->getInputDirectory($version);
+		$modules = $this->getReleaseModules($directory);
 
 		// Steps
-		$step = new CreateChangeLog($this, $version, $fromVersion, $directory);
+		$step = new CreateChangeLog($this, $version, $fromVersion, $directory, $modules);
 		$step->run($this->input, $this->output);
 	}
 

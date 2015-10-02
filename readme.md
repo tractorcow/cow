@@ -32,6 +32,12 @@ to create one for the RC release.
 cow release 3.1.14-rc1 -vvv --from=3.1.13 --branch-auto
 ```
 
+And once I've checked that all is fine, and am 100% sure that this code is ready to go.
+
+```
+cow release:publish 3.1.14-rc1 -vvv
+```
+
 ## Release
 
 `cow release <version>` will perform all release tasks. <version> is mandatory and must be the exact tag name to release.
@@ -47,7 +53,7 @@ it will install to the path specified by `./release-<version>` in the current di
   If omitted, no branching is performed. `--branch-auto` can be used to just default to the major.minor.patch
   version of the release. It's advisable to specify this, but not always necessary, when doing pre-releases.
 
-## Sub-commands
+## Release sub-commands
 
 `release` actually has several sub-commands which can be run independently. These are as below:
 
@@ -56,8 +62,32 @@ it will install to the path specified by `./release-<version>` in the current di
 * `release:translate` Updates translations and commits this to source control
 * `release:changelog` Just generates the changelog and commits this to source control.
 * `release:test` Run unit tests
+
+## Publishing releases
+
+`cow release` will only build the release itself. Once all of the above steps are complete, it is necessary
+to take the finished release and push it out to the open source community. A second major command `cow release:publish`
+is necessary to perform the final steps. The format for this command is:
+
+`cow release:publish <version>`
+
+This command has these options:
+
+* `-vvv` to ensure all underlying commands are echoed
+* `--directory <directory>` to specify the folder to look for the project created in the prior step. As with
+  above, it will be guessed if omitted. You can run this command in the `./release-<version>` directory and 
+  omit this option.
+* `--aws-profile <profile>` to specify the AWS profile name for uploading releases to s3. Check with
+  damian@silverstripe.com if you don't have an AWS key setup. 
+
+## Publish sub-commands
+
+The release process, as with the initial `cow release` command, will actually be composed of several sub-commands,
+each of which could be run separately.
+
 * `release:tag` Add annotated tags to each module
 * `release:push` Push branch and tag up to origin
+* `release:archive` Generate tar.gz and zip archives of this release
 * `release:upload` Upload archived projects to silverstripe.org
 
 ## Module-level commands

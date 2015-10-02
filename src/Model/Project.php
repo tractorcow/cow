@@ -32,16 +32,27 @@ class Project extends Module {
 	/**
 	 * Gets the list of modules in this installer
 	 *
+	 * @param array $filter Optional list of modules to filter
+	 * @param bool $listIsExclusive Set to true if this list is exclusive
 	 * @return Module[]
 	 */
-	public function getModules() {
+	public function getModules($filter = array(), $listIsExclusive = false) {
 		// Include self as head module
-		$modules = array($this);
+		$modules = array();
+		if(empty($filter) || in_array($this->getName(), $filter) != $listIsExclusive) {
+			$modules[] = $this;
+		}
 		
 		// Search all directories
 		foreach(glob($this->directory."/*", GLOB_ONLYDIR) as $dir) {
-			if($this->isModulePath($dir)) {
-				$name = basename($dir);
+			// Skip non-modules
+			if(!$this->isModulePath($dir)) {
+				continue;
+			}
+
+			// Filter
+			$name = basename($dir);
+			if(empty($filter) || in_array($name, $filter) != $listIsExclusive) {
 				$modules[] = new Module($dir, $name, $this);
 			}
 		}

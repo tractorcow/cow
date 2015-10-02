@@ -7,8 +7,6 @@ use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Release\CreateBranch;
 use SilverStripe\Cow\Steps\Release\CreateChangeLog;
 use SilverStripe\Cow\Steps\Release\CreateProject;
-//use SilverStripe\Cow\Steps\Release\PushRelease;
-//use SilverStripe\Cow\Steps\Release\TagModules;
 use SilverStripe\Cow\Steps\Release\RunTests;
 use SilverStripe\Cow\Steps\Release\UpdateTranslations;
 use Symfony\Component\Console\Input\InputArgument;
@@ -16,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
 
 /**
- * Description of Create
+ * Execute each release step in order to publish a new version
  *
  * @author dmooyman
  */
@@ -27,39 +25,37 @@ class Release extends Command {
 	protected $description = 'Execute each release step in order to publish a new version';
 
 	const BRANCH_AUTO = 'auto';
-	
-	protected function configure() {
-		parent::configure();
-		
+
+	protected function configureOptions() {
 		$this
 			->addArgument('version', InputArgument::REQUIRED, 'Exact version tag to release this project as')
 			->addOption('from', 'f', InputOption::VALUE_REQUIRED, 'Version to generate changelog from')
 			->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to release project from')
 			->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project')
 			->addOption('branch', 'b', InputOption::VALUE_REQUIRED, 'Branch each module to this')
-			->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch')
-			->addOption('aws-profile', null, InputOption::VALUE_REQUIRED, "AWS profile to use for upload", "silverstripe");
+			->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch');
 	}
-	
-	
+
 	protected function fire() {
 		// Get arguments
 		$version = $this->getInputVersion();
 		$fromVersion = $this->getInputFromVersion($version);
 		$directory = $this->getInputDirectory($version);
 		$branch = $this->getInputBranch($version);
-		$awsProfile = $this->getInputAWSProfile();
 
 		// Make the directory
 		$project = new CreateProject($this, $version, $directory);
 		$project->run($this->input, $this->output);
 
+		// Once the project is setup, we can extract the module list to publish
+		$modules = $this->getReleaseModules($directory);
+
 		// Change to the correct temp branch (if given)
-		$branch = new CreateBranch($this, $directory, $branch);
+		$branch = new CreateBranch($this, $directory, $branch, $modules);
 		$branch->run($this->input, $this->output);
 		
 		// Update all translations
-		$translate = new UpdateTranslations($this, $directory);
+		$translate = new UpdateTranslations($this, $directory, $modules);
 		$translate->run($this->input, $this->output);
 		
 		// Run tests
@@ -67,19 +63,12 @@ class Release extends Command {
 		$test->run($this->input, $this->output);
 
 		// Generate changelog
-		$changelogs = new CreateChangeLog($this, $version, $fromVersion, $directory);
+		$changelogs = new CreateChangeLog($this, $version, $fromVersion, $directory, $modules);
 		$changelogs->run($this->input, $this->output);
-		
-		// Tag
-		/* new TagModules($this, $version, $directory), */ // Run this manually for now via release:tag
-		// Push tag & branch
-		/* new PushRelease($this, $directory) */ // Run this manually for now via release:push
-		// Create packages
-		// @todo
-		// Upload
-		/* new UploadArchive($this, $version, $directory, $awsProfile) */ // Run this manually for now via release:upload
-		// Merge temp branch back into main
-		// @todo (or just do manually? maybe output some manual instructions here)
+
+		// Output completion
+		$output->writeln("<info>Success!</info> Release has been updated.");
+		$output->writeln("Please check the changes made by this command, and run <info>cow release:publish</info>");
 	}
 
 	/**
@@ -179,6 +168,33 @@ class Release extends Command {
 			throw new InvalidArgumentException('--security flag not yet implemented');
 		}
 		return (bool)$security;
+	}
+
+	/**
+	 * Get modules to include in this release. Skips those not in the project's composer.json
+	 *
+	 * @param string $directory where the project is setup
+	 * @return array
+	 */
+	protected function getReleaseModules($directory) {
+		$path = realpath($directory);
+		$composerPath = realpath($path . '/composer.json');
+		if(empty($composerPath)) {
+			throw new \InvalidArgumentException("Project not installed at \"{$path}\"");
+		}
+		$composer = json_decode(file_get_contents($composerPath), true);
+
+		$modules = array('installer');
+		foreach($composer['require'] as $module => $version) {
+			// Only include self.version modules
+			if($version !== 'self.version') {
+				continue;
+			}
+
+			list($vendor, $module) = explode('/', $module);
+			$modules[] = $module;
+		}
+		return $modules;
 	}
 
 }

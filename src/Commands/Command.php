@@ -36,7 +36,13 @@ abstract class Command extends Console\Command\Command
     {
         $this->setName($this->name);
         $this->setDescription($this->description);
+		$this->configureOptions();
     }
+
+	/**
+	 * Setup custom options for this command
+	 */
+	abstract protected function configureOptions();
 
     /**
      * {@inheritdoc}
