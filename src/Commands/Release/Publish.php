@@ -6,6 +6,7 @@ use SilverStripe\Cow\Steps\Release\BuildArchive;
 use SilverStripe\Cow\Steps\Release\PushRelease;
 use SilverStripe\Cow\Steps\Release\TagModules;
 use SilverStripe\Cow\Steps\Release\UploadArchive;
+use SilverStripe\Cow\Steps\Release\Wait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -41,6 +42,10 @@ class Publish extends Release {
 		// Push tag & branch
 		$push = new PushRelease($this, $directory, $modules);
 		$push->run($this->input, $this->output);
+
+		// Once pushed, wait until installable
+		$wait = new Wait($this, $version);
+		$wait->run($this->input, $this->output);
 
 		// Create packages
 		$package = new BuildArchive($this, $version, $directory);

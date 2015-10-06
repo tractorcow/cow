@@ -40,7 +40,8 @@ cow release:publish 3.1.14-rc1 -vvv
 
 ## Release
 
-`cow release <version>` will perform all release tasks. <version> is mandatory and must be the exact tag name to release.
+`cow release <version>` will perform the first part of the release tasks.
+<version> is mandatory and must be the exact tag name to release.
 
 This command has these options:
 
@@ -52,8 +53,6 @@ it will install to the path specified by `./release-<version>` in the current di
 * `--branch <branch>` or just `--branch-auto` will automatically branch each module to a temp branch for this release.
   If omitted, no branching is performed. `--branch-auto` can be used to just default to the major.minor.patch
   version of the release. It's advisable to specify this, but not always necessary, when doing pre-releases.
-
-## Release sub-commands
 
 `release` actually has several sub-commands which can be run independently. These are as below:
 
@@ -80,8 +79,6 @@ This command has these options:
 * `--aws-profile <profile>` to specify the AWS profile name for uploading releases to s3. Check with
   damian@silverstripe.com if you don't have an AWS key setup. 
 
-## Publish sub-commands
-
 The release process, as with the initial `cow release` command, will actually be composed of several sub-commands,
 each of which could be run separately.
 
@@ -89,6 +86,9 @@ each of which could be run separately.
 * `release:push` Push branch and tag up to origin
 * `release:archive` Generate tar.gz and zip archives of this release
 * `release:upload` Upload archived projects to silverstripe.org
+
+After the push step, `release:publish` will automatically wait for this version to be available in packagist.org
+before continuing.
 
 ## Module-level commands
 
