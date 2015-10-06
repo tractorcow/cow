@@ -221,7 +221,7 @@ TMPL;
 	 * Push source updates to transifex
 	 *
 	 * @param OutputInterface $output
-	 * @param type $modules
+	 * @param Module[] $modules
 	 */
 	public function pushSource(OutputInterface $output, $modules) {
 		$this->log($output, "Pushing updated sources to transifex");
@@ -232,7 +232,8 @@ TMPL;
 				'(cd %s && tx push -s)',
 				$module->getDirectory()
 			);
-			$this->runCommand($output, $pushCommand, "Error pushing module {$module} to origin");
+			$moduleName = $module->getName();
+			$this->runCommand($output, $pushCommand, "Error pushing module {$moduleName} to origin");
 		}
 	}
 	

@@ -107,7 +107,12 @@ class Module {
 	public function isTranslatable() {
 		return $this->directory && realpath($this->directory . '/.tx/config');
 	}
-	
+
+	/**
+	 * Get name of this module
+	 *
+	 * @return string
+	 */
 	public function getName() {
 		return $this->name;
 	}
