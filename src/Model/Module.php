@@ -148,7 +148,9 @@ class Module {
 	 * @return Repository
 	 */
 	public function getRepository() {
-		return new Repository($this->directory);
+		return new Repository($this->directory, array(
+			'environment_variables' => array('HOME' => getenv('HOME'))
+		));
 	}
 	
 	/**
