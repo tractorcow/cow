@@ -83,15 +83,6 @@ class Release extends Command {
 	}
 
 	/**
-	 * Get the aws profile to use
-	 *
-	 * @return silverstripe
-	 */
-	public function getInputAWSProfile() {
-		return $this->input->getOption('aws-profile');
-	}
-
-	/**
 	 * Determine the branch name that should be used
 	 *
 	 * @param ReleaseVersion $version

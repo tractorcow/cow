@@ -9,10 +9,9 @@ use SilverStripe\Cow\Steps\Release\BuildArchive;
  *
  * @author dmooyman
  */
-class Archive extends Release {
+class Archive extends Publish {
 
 	/**
-	 *
 	 * @var string
 	 */
 	protected $name = 'release:archive';

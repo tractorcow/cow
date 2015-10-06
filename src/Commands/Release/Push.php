@@ -9,7 +9,7 @@ use SilverStripe\Cow\Steps\Release\PushRelease;
  *
  * @author dmooyman
  */
-class Push extends Release {
+class Push extends Publish {
 
 	/**
 	 * @var string

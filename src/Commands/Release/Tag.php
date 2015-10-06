@@ -9,10 +9,9 @@ use SilverStripe\Cow\Steps\Release\TagModules;
  *
  * @author dmooyman
  */
-class Tag extends Release {
+class Tag extends Publish {
 
 	/**
-	 *
 	 * @var string
 	 */
 	protected $name = 'release:tag';

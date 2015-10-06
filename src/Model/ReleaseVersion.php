@@ -186,7 +186,7 @@ class ReleaseVersion {
 	/**
 	 * For this version, generate the filename
 	 *
-	 * @param bol $includeCMS Does this include CMS?
+	 * @param bool $includeCMS Does this include CMS?
 	 * @param string $extension archive extension (including period)
 	 * @return string
 	 */

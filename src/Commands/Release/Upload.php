@@ -9,10 +9,9 @@ use SilverStripe\Cow\Steps\Release\UploadArchive;
  *
  * @author dmooyman
  */
-class Upload extends Release {
+class Upload extends Publish {
 
 	/**
-	 *
 	 * @var string
 	 */
 	protected $name = 'release:upload';

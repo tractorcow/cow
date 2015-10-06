@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Cow\Steps\Release;
 
+use Exception;
 use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Model\Project;
 use SilverStripe\Cow\Model\ReleaseVersion;
@@ -63,7 +64,7 @@ class BuildArchive extends Step {
 		$this->log($output, "Generating new archive files");
 		$path = $this->createProject($output);
 		$this->buildFiles($output, $path);
-		$this->log($output, 'Upload complete');
+		$this->log($output, 'Archive complete');
 	}
 
 	/**
@@ -99,7 +100,7 @@ class BuildArchive extends Step {
 	 *
 	 * @param string $from
 	 * @param string $to
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	protected function copy($from, $to) {
 		$this->unlink($to);
@@ -107,14 +108,14 @@ class BuildArchive extends Step {
 		// Copy file if not a folder
 		if(!is_dir($from)) {
 			if(copy($from, $to) === false) {
-				throw new \Exception("Could not copy from {$from} to {$to}");
+				throw new Exception("Could not copy from {$from} to {$to}");
 			}
 			return;
 		}
 		
 		// Create destination
 		if(mkdir($to) === false) {
-			throw new \Exception("Could not create destination folder {$to}");
+			throw new Exception("Could not create destination folder {$to}");
 		}
 
 		// Iterate files
@@ -133,12 +134,12 @@ class BuildArchive extends Step {
 	 *
 	 * @param string $path
 	 * @param string $content
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	protected function write($path, $content) {
 		$result = file_put_contents($path, $content);
 		if($result === false) {
-			throw new \Exception("Could not write to {$path}");
+			throw new Exception("Could not write to {$path}");
 		}
 	}
 
@@ -216,20 +217,26 @@ class BuildArchive extends Step {
 	 * @param string $path Location of project to archive
 	 */
 	protected function buildFiles(OutputInterface $output, $path) {
-		/*
 		$version = $this->getVersion()->getValue();
 		$cmsArchive = "SilverStripe-cms-v{$version}";
 		$frameworkArchive = "SilverStripe-framework-v{$version}";
-
 		$destination = $this->getProject()->getDirectory();
 
+		// Build each version
+		foreach(array($cmsArchive, $frameworkArchive) as $archive) {
+			$sourceDirArg = escapeshellarg("{$path}/{$archive}/");
 
-		// Build tar files
-		$phar = new PharData($destination . '/' . $cmsArchive);
-		foreach($this->getVersion()->getReleaseFilenames() as $filename) {
-			// Build paths
-			$this->log($output, "Uploading <info>{$filename}</info>");
-			$from = $this->getProject()->getDirectory() . '/' . $filename;
-		}*/
+			// Build tar files
+			$tarFile = "{$destination}/{$archive}.tar.gz";
+			$this->log($output, "Building <info>$tarFile</info>");
+			$tarFileArg = escapeshellarg($tarFile);
+			$this->runCommand($output, "cd {$sourceDirArg} && tar -cvzf {$tarFileArg} .");
+
+			// Build zip files
+			$zipFile = "{$destination}/{$archive}.zip";
+			$this->log($output, "Building <info>{$zipFile}</info>");
+			$zipFileArg = escapeshellarg($zipFile);
+			$this->runCommand($output, "cd {$sourceDirArg} && zip -rv {$zipFileArg} .");
+		}
 	}
 }
