@@ -66,7 +66,7 @@ class CreateChangeLog extends ModuleStep {
 
 		// Generate changelog content
 		$changelog = new ChangeLog($this->getModules(), $this->from);
-		$content = $changelog->getMarkdown();
+		$content = $changelog->getMarkdown($output);
 
 		// Now we need to merge this content with the file, or otherwise create it
 		$path = $this->getChangelogPath();

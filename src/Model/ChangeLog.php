@@ -2,6 +2,9 @@
 
 namespace SilverStripe\Cow\Model;
 
+use Gitonomy\Git\Exception\ReferenceNotFoundException;
+use Symfony\Component\Console\Output\OutputInterface;
+
 /**
  * A changelog which can be generated from a project
  */
@@ -33,23 +36,33 @@ class ChangeLog {
 	/**
 	 * Get the list of changes for this module
 	 * 
-	 * 
+	 * @param OutputInterface $output
 	 * @param Module $module
 	 * @return array
 	 */
-	protected function getModuleLog(Module $module) {
-		// Get raw log
-		$range = $this->fromVersion->getValue()."..HEAD";
-		$log = $module->getRepository()->getLog($range);
-		
+	protected function getModuleLog(OutputInterface $output, Module $module) {
 		$items = array();
-		foreach($log->getCommits() as $commit) {
-			$change = new ChangelogItem($module, $commit);
-			
-			// Skip ignored items
-			if(!$change->isIgnored()) {
-				$items[] = $change;
+		
+		// Get raw log
+		$fromVersion = $this->fromVersion->getValue();
+		$range = $fromVersion."..HEAD";
+		try {
+			$log = $module->getRepository()->getLog($range);
+
+			foreach($log->getCommits() as $commit) {
+				$change = new ChangelogItem($module, $commit);
+
+				// Skip ignored items
+				if(!$change->isIgnored()) {
+					$items[] = $change;
+				}
 			}
+		} catch(ReferenceNotFoundException $ex) {
+			$moduleName = $module->getName();
+			$output->writeln(
+				"<error>Module {$moduleName} does not have from-version {$fromVersion}; "
+					. "Skipping changelog for this module</error>"
+			);
 		}
 		return $items;
 	}
@@ -57,12 +70,13 @@ class ChangeLog {
 	/**
 	 * Get all changes grouped by type
 	 *
+	 * @param OutputInterface $output
 	 * @return array
 	 */
-	protected function getGroupedChanges() {
+	protected function getGroupedChanges(OutputInterface $output) {
 		$changes = array();
 		foreach($this->getModules() as $module) {
-			$moduleChanges = $this->getModuleLog($module);
+			$moduleChanges = $this->getModuleLog($output, $module);
 			$changes = array_merge($changes, $moduleChanges);
 		}
 
@@ -73,10 +87,11 @@ class ChangeLog {
 	/**
 	 * Generate output in markdown format
 	 *
+	 * @param OutputInterface
 	 * @return string
 	 */
-	public function getMarkdown() {
-		$groupedLog = $this->getGroupedChanges();
+	public function getMarkdown(OutputInterface $output) {
+		$groupedLog = $this->getGroupedChanges($output);
 
 		// Convert to string and generate markdown (add list to beginning of each item)
 		$output = "\n\n## Change Log\n";
