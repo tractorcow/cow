@@ -8,6 +8,9 @@ date_default_timezone_set("Pacific/Auckland");
 $paths = [
     __DIR__ . "/../autoload.php",
     __DIR__ . "/../vendor/autoload.php",
+    __DIR__ . "/../../vendor/autoload.php",
+    __DIR__ . "/../../../vendor/autoload.php",
+    __DIR__ . "/../../../../vendor/autoload.php",
 ];
 
 $included = false;
@@ -16,6 +19,7 @@ foreach ($paths as $path) {
     if (file_exists($path)) {
         require_once $path;
         $included = true;
+		break;
     }
 }
 
