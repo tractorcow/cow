@@ -36,13 +36,13 @@ abstract class Command extends Console\Command\Command
     {
         $this->setName($this->name);
         $this->setDescription($this->description);
-		$this->configureOptions();
+        $this->configureOptions();
     }
 
-	/**
-	 * Setup custom options for this command
-	 */
-	abstract protected function configureOptions();
+    /**
+     * Setup custom options for this command
+     */
+    abstract protected function configureOptions();
 
     /**
      * {@inheritdoc}
@@ -52,8 +52,8 @@ abstract class Command extends Console\Command\Command
         $this->input = $input;
         $this->output = $output;
 
-		// Configure extra output formats
-		$this->output->getFormatter()->setStyle('bold', new OutputFormatterStyle('blue'));
+        // Configure extra output formats
+        $this->output->getFormatter()->setStyle('bold', new OutputFormatterStyle('blue'));
 
         $this->fire();
     }

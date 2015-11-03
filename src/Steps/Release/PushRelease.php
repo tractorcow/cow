@@ -10,19 +10,21 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author dmooyman
  */
-class PushRelease extends ModuleStep {
+class PushRelease extends ModuleStep
+{
+    public function getStepName()
+    {
+        return 'push';
+    }
 
-	public function getStepName() {
-		return 'push';
-	}
-
-	public function run(InputInterface $input, OutputInterface $output) {
-		$this->log($output, "Pushing all modules to origin");
-		$modules = $this->getModules();
-		foreach($modules as $module) {
-			$this->log($output, "Pushing module <info>" . $module->getName() . "</info>");
-			$module->pushTo('origin', true);
-		}
-		$this->log($output, 'Pushing complete');
-	}
+    public function run(InputInterface $input, OutputInterface $output)
+    {
+        $this->log($output, "Pushing all modules to origin");
+        $modules = $this->getModules();
+        foreach ($modules as $module) {
+            $this->log($output, "Pushing module <info>" . $module->getName() . "</info>");
+            $module->pushTo('origin', true);
+        }
+        $this->log($output, 'Pushing complete');
+    }
 }

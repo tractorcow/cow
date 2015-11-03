@@ -9,22 +9,23 @@ use SilverStripe\Cow\Steps\Release\BuildArchive;
  *
  * @author dmooyman
  */
-class Archive extends Publish {
+class Archive extends Publish
+{
+    /**
+     * @var string
+     */
+    protected $name = 'release:archive';
 
-	/**
-	 * @var string
-	 */
-	protected $name = 'release:archive';
+    protected $description = 'Create archives for the release in tar.gz and zip formats';
 
-	protected $description = 'Create archives for the release in tar.gz and zip formats';
+    protected function fire()
+    {
+        // Get arguments
+        $version = $this->getInputVersion();
+        $directory = $this->getInputDirectory($version);
 
-	protected function fire() {
-		// Get arguments
-		$version = $this->getInputVersion();
-		$directory = $this->getInputDirectory($version);
-
-		// Steps
-		$step = new BuildArchive($this, $version, $directory);
-		$step->run($this->input, $this->output);
-	}
+        // Steps
+        $step = new BuildArchive($this, $version, $directory);
+        $step->run($this->input, $this->output);
+    }
 }

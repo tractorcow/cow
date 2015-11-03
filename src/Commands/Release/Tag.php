@@ -9,23 +9,24 @@ use SilverStripe\Cow\Steps\Release\TagModules;
  *
  * @author dmooyman
  */
-class Tag extends Publish {
+class Tag extends Publish
+{
+    /**
+     * @var string
+     */
+    protected $name = 'release:tag';
 
-	/**
-	 * @var string
-	 */
-	protected $name = 'release:tag';
+    protected $description = 'Tag all modules';
 
-	protected $description = 'Tag all modules';
+    protected function fire()
+    {
+        // Get arguments
+        $version = $this->getInputVersion();
+        $directory = $this->getInputDirectory($version);
+        $modules = $this->getReleaseModules($directory);
 
-	protected function fire() {
-		// Get arguments
-		$version = $this->getInputVersion();
-		$directory = $this->getInputDirectory($version);
-		$modules = $this->getReleaseModules($directory);
-
-		// Steps
-		$step = new TagModules($this, $version, $directory, $modules);
-		$step->run($this->input, $this->output);
-	}
+        // Steps
+        $step = new TagModules($this, $version, $directory, $modules);
+        $step->run($this->input, $this->output);
+    }
 }

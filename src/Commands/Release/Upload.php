@@ -9,23 +9,24 @@ use SilverStripe\Cow\Steps\Release\UploadArchive;
  *
  * @author dmooyman
  */
-class Upload extends Publish {
+class Upload extends Publish
+{
+    /**
+     * @var string
+     */
+    protected $name = 'release:upload';
 
-	/**
-	 * @var string
-	 */
-	protected $name = 'release:upload';
+    protected $description = 'Uploads archiveds to silverstripe.org';
 
-	protected $description = 'Uploads archiveds to silverstripe.org';
+    protected function fire()
+    {
+        // Get arguments
+        $version = $this->getInputVersion();
+        $directory = $this->getInputDirectory($version);
+        $awsProfile = $this->getInputAWSProfile();
 
-	protected function fire() {
-		// Get arguments
-		$version = $this->getInputVersion();
-		$directory = $this->getInputDirectory($version);
-		$awsProfile = $this->getInputAWSProfile();
-
-		// Steps
-		$step = new UploadArchive($this, $version, $directory, $awsProfile);
-		$step->run($this->input, $this->output);
-	}
+        // Steps
+        $step = new UploadArchive($this, $version, $directory, $awsProfile);
+        $step->run($this->input, $this->output);
+    }
 }

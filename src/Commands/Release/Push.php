@@ -9,23 +9,24 @@ use SilverStripe\Cow\Steps\Release\PushRelease;
  *
  * @author dmooyman
  */
-class Push extends Publish {
+class Push extends Publish
+{
+    /**
+     * @var string
+     */
+    protected $name = 'release:push';
 
-	/**
-	 * @var string
-	 */
-	protected $name = 'release:push';
+    protected $description = 'Push up changes to origin (including tags)';
 
-	protected $description = 'Push up changes to origin (including tags)';
+    protected function fire()
+    {
+        // Get arguments
+        $version = $this->getInputVersion();
+        $directory = $this->getInputDirectory($version);
+        $modules = $this->getReleaseModules($directory);
 
-	protected function fire() {
-		// Get arguments
-		$version = $this->getInputVersion();
-		$directory = $this->getInputDirectory($version);
-		$modules = $this->getReleaseModules($directory);
-
-		// Steps
-		$step = new PushRelease($this, $directory, $modules);
-		$step->run($this->input, $this->output);
-	}
+        // Steps
+        $step = new PushRelease($this, $directory, $modules);
+        $step->run($this->input, $this->output);
+    }
 }
