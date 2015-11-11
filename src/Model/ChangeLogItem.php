@@ -241,7 +241,7 @@ class ChangeLogItem
         $date = $this->getDate()->format('Y-m-d');
         $message = $this->getMessage();
         $author = $this->getAuthor();
-        $content = sprintf(" * {$date} [{$shortHash}]($link) {$message} ($author)");
+		$content = " * {$date} [{$shortHash}]({$link}) {$message} ({$author})";
 
         // Append security identifier
         if ($cve = $this->getSecurityCVE()) {
