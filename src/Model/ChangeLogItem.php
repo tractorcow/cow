@@ -39,7 +39,7 @@ class ChangeLogItem
      *
      * @var string
      */
-    protected $cveURL = "http://www.silverstripe.org/software/download/security-releases/";
+    protected $cveURL = "http://www.silverstripe.org/download/security-releases/";
 
     /**
      * Order of the array keys determines order of the lists.
