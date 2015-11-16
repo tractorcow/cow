@@ -59,8 +59,8 @@ it will install to the path specified by `./release-<version>` in the current di
 * `release:create` creates the project folder
 * `release:branch` Will (if needed) branch all modules
 * `release:translate` Updates translations and commits this to source control
-* `release:changelog` Just generates the changelog and commits this to source control.
 * `release:test` Run unit tests
+* `release:changelog` Just generates the changelog and commits this to source control.
 
 ## Publishing releases
 
