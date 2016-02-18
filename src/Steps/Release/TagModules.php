@@ -46,11 +46,17 @@ class TagModules extends ModuleStep
 
     public function run(InputInterface $input, OutputInterface $output)
     {
-        $this->log($output, "Tagging modules as " . $this->getVersion()->getValue());
+        $tag = $this->getVersion()->getValue();
+        $this->log($output, "Tagging modules as " . $tag);
 
         foreach ($this->getModules() as $module) {
             $this->log($output, "Tagging module " . $module->getName());
-            $module->addTag($this->getVersion()->getValue());
+            $tags = $module->getTags();
+            if(in_array($tag, $tags)) {
+                $this->log($output, "Skipping existing tag: <info>{$tag}</info>");
+            } else {
+                $module->addTag($tag);
+            }
         }
         
         $this->log($output, 'Tagging complete');
