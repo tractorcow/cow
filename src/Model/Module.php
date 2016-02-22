@@ -188,6 +188,19 @@ class Module
     }
 
     /**
+     * Gets all tags that exist in the repository
+     *
+     * @return array
+     */
+    public function getTags()
+    {
+        $repo = $this->getRepository();
+        $result = $repo->run('tag');
+        $tags = preg_split('~\R~u', $result);
+        return array_filter($tags);
+    }
+
+    /**
      * Tag this module
      *
      * @param string $tag
