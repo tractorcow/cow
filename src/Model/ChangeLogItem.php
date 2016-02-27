@@ -58,7 +58,7 @@ class ChangeLogItem
             '/^(ENHANCEMENT|ENHNACEMENT|FEATURE|NEW)\s?:?/i'
         ),
         'Bugfixes' => array(
-            '/^(BUGFIX|BUGFUX|BUG|FIX)\s?:?/',
+            '/^(BUGFIX|BUGFUX|BUG|FIX|FIXED)\s?:?/',
             '/^(BUG FIX)\s?:?/'
         )
     );
