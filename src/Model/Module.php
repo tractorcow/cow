@@ -163,7 +163,10 @@ class Module
     public function getRepository(OutputInterface $output = null)
     {
         $repo = new Repository($this->directory, array(
-            'environment_variables' => array('HOME' => getenv('HOME'))
+            'environment_variables' => array(
+                'HOME' => getenv('HOME'),
+                'SSH_AUTH_SOCK' => getenv('SSH_AUTH_SOCK')
+            )
         ));
         // Include logger if requested
         if($output) {
@@ -325,24 +328,6 @@ class Module
         if(in_array($branch, $localBranches) && in_array($branch, $remoteBranches)) {
             $repository->run('pull', [$remote, $branch]);
         }
-    }
-
-    /**
-     * Merge changes into this module from the given branch
-     *
-     * @param OutputInterface $output
-     * @param string $branch
-     * @return bool True if successful, false if merge conflict
-     */
-    public function merge(OutputInterface $output, $branch) {
-        $repository = $this->getRepository($output);
-
-        $current = $this->getBranch();
-        $repository->run('merge', [
-            $branch,
-            '-m',
-            "Merge {$branch} into {$current}"
-        ]);
     }
 
     /**

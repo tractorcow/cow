@@ -8,6 +8,8 @@ use SilverStripe\Cow\Model\Module;
 use SilverStripe\Cow\Steps\Release\ModuleStep;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * Class MergeBranch
@@ -36,18 +38,24 @@ class MergeBranch extends ModuleStep
     protected $push = false;
 
     /**
+     * @var bool
+     */
+    protected $interactive = false;
+
+    /**
      * List of repos with conflicts
      *
      * @var array
      */
     protected $conflicts = [];
 
-    public function __construct(Command $command, $directory = '.', $modules = array(), $listIsExclusive = false, $from, $to, $push)
+    public function __construct(Command $command, $directory = '.', $modules = array(), $listIsExclusive = false, $from, $to, $push, $interactive)
     {
         parent::__construct($command, $directory, $modules, $listIsExclusive);
         $this->setFrom($from);
         $this->setTo($to);
         $this->setPush($push);
+        $this->setInteractive($interactive);
     }
 
     public function getStepName()
@@ -64,7 +72,7 @@ class MergeBranch extends ModuleStep
 
         $this->conflicts = [];
         foreach($this->getModules() as $module) {
-            $this->mergeModule($output, $module);
+            $this->mergeModule($input, $output, $module);
         }
 
         // Display output
@@ -82,10 +90,12 @@ class MergeBranch extends ModuleStep
     /**
      * Merge the given branches on this module
      *
+     * @param InputInterface $input
      * @param OutputInterface $output
      * @param Module $module
+     * @throws \Exception
      */
-    protected function mergeModule(OutputInterface $output, Module $module) {
+    protected function mergeModule(InputInterface $input, OutputInterface $output, Module $module) {
         $this->log($output, "Merging module <info>" . $module->getComposerName() . "</info>");
 
         $module->fetch($output);
@@ -93,9 +103,52 @@ class MergeBranch extends ModuleStep
         $module->checkout($output, $this->getTo());
 
         try {
-            $module->merge($output, $this->getFrom());
+            // Create merge
+            $repository = $module->getRepository($output);
+            $message = sprintf("Merge %s into %s", $this->getFrom(), $this->getTo());
+            $result = $repository->run('merge', [
+                $this->getFrom(),
+                '--no-commit',
+                '--no-ff',
+                '-m',
+                $message
+            ]);
+
+            // Skip if there is nothing to merge
+            if(stripos($result, "Already up-to-date.") === 0) {
+                $this->log($output, "No changes to merge, skipping");
+                return;
+            }
+
+            // check interactive mode
+            if($this->getInteractive()) {
+                $helper = $this->getQuestionHelper();
+                $this->log($output, "Changes pending review in <info>" . $module->getDirectory() . "</info>");
+                $question = new ChoiceQuestion(
+                    "Please review changes and confirm (defaults to continue): ",
+                    array("continue", "skip", "abort"),
+                    "continue"
+                );
+                $answer = $helper->ask($input, $output, $question);
+                if($answer !== "continue") {
+                    $this->log($output, "Reverting merge...");
+                    $repository->run('merge', ['--abort']);
+                }
+
+                // Let's get out of here!
+                if($answer === 'abort') {
+                    die();
+                }
+                if($answer === 'skip') {
+                    return;
+                }
+            }
+
+            // Commit merge
+            $repository->run('commit', ['-m', $message]);
             $this->Log($output, "Merge successful!");
 
+            // Do upstream push
             if($this->getPush()) {
                 $this->log($output, "Pushing upstream");
                 $module->pushTo();
@@ -159,6 +212,24 @@ class MergeBranch extends ModuleStep
     public function setPush($push)
     {
         $this->push = $push;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getInteractive()
+    {
+        return $this->interactive;
+    }
+
+    /**
+     * @param bool $interactive
+     * @return $this
+     */
+    public function setInteractive($interactive)
+    {
+        $this->interactive = $interactive;
         return $this;
     }
 

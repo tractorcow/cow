@@ -104,7 +104,7 @@ to exclude. By default all modules are included, unless whitelisted or excluded.
 When a release is done, the laborious task of merging up all changes begins. This is where it
 can be handy to use the `branch:merge` command. This command has this syntax:
 
-`branch:merge <from> <to> [<module>, ..] [--push] [--exclude] [-vvv]`
+`branch:merge <from> <to> [<module>, ..] [--interactive] [--push] [--exclude] [-vvv]`
 
 This should be run in the project root, and will automatically merge each core module
 from the `<from>` branch into the `<to>` branch. If either branches haven't yet been
@@ -121,3 +121,5 @@ trigger a push after the merge is complete.
 If a merge fails, or has unresolved conflicts, then a message will be displayed at the end of
 execution with the list of directories that should be manually resolved. Once resolved (and
 committed), just run the command again and it should continue.
+
+`--interactive` mode will pause before each commit, to allow you to review changes.
