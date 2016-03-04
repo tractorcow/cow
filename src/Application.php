@@ -40,6 +40,9 @@ class Application extends Console\Application
         // Module commands
         $commands[] = new Commands\Module\Translate();
 
+        // Branch commands
+        $commands[] = new Commands\Branch\Merge();
+
         return $commands;
     }
 }

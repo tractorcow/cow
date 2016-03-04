@@ -35,9 +35,24 @@ class ReleaseVersion
      */
     protected $stabilityVersion;
 
+    /**
+     * Helper method to parse a version
+     *
+     * @param string $version
+     * @return bool|array Either false, or an array of parts
+     */
+    public static function parse($version) {
+        $valid = preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>rc|alpha|beta)(?<stabilityVersion>\d+)?)?$/', $version, $matches);
+        if(!$valid) {
+            return false;
+        }
+        return $matches;
+    }
+
     public function __construct($version)
     {
-        if (!preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>rc|alpha|beta)(?<stabilityVersion>\d+)?)?$/', $version, $matches)) {
+        $matches = static::parse($version);
+        if ($matches === false) {
             throw new InvalidArgumentException(
                 "Invalid version $version. Expect full version (3.1.13) with optional rc|alpha|beta suffix"
             );
