@@ -32,7 +32,7 @@ class Project extends Module
     }
     
     /**
-     * Gets the list of modules in this installer
+     * Gets the list of self.version modules in this installer
      *
      * @param array $filter Optional list of modules to filter
      * @param bool $listIsExclusive Set to true if this list is exclusive
@@ -40,6 +40,8 @@ class Project extends Module
      */
     public function getModules($filter = array(), $listIsExclusive = false)
     {
+        $composer = $this->getComposerData();
+
         // Include self as head module
         $modules = array();
         if (empty($filter) || in_array($this->getName(), $filter) != $listIsExclusive) {
@@ -53,11 +55,26 @@ class Project extends Module
                 continue;
             }
 
-            // Filter
+            // Skip if filtered
             $name = basename($dir);
-            if (empty($filter) || in_array($name, $filter) != $listIsExclusive) {
-                $modules[] = new Module($dir, $name, $this);
+            if (!empty($filter) && (in_array($name, $filter) == $listIsExclusive)) {
+                continue;
             }
+            $module = new Module($dir, $name, $this);
+
+            // Filter by self.version module,
+            // but let whitelisted queries to override this
+            if(empty($filter) || $listIsExclusive) {
+                $composerName = $module->getComposerName();
+                if (!isset($composer['require'][$composerName]) ||
+                    ($composer['require'][$composerName] !== 'self.version')
+                ) {
+                    continue;
+                }
+            }
+
+            // Save
+            $modules[] = $module;
         }
         return $modules;
     }

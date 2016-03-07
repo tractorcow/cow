@@ -2,9 +2,12 @@
 
 namespace SilverStripe\Cow\Model;
 
+use Exception;
 use Gitonomy\Git\Reference\Branch;
 use Gitonomy\Git\Repository;
 use InvalidArgumentException;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A module installed in a project
@@ -150,17 +153,27 @@ class Module
         $name = $this->getName();
         return "https://github.com/{$team}/silverstripe-{$name}/";
     }
-    
+
     /**
      * Get git repo for this module
-     * 
+     *
+     * @param OutputInterface $output Optional output to log to
      * @return Repository
      */
-    public function getRepository()
+    public function getRepository(OutputInterface $output = null)
     {
-        return new Repository($this->directory, array(
-            'environment_variables' => array('HOME' => getenv('HOME'))
+        $repo = new Repository($this->directory, array(
+            'environment_variables' => array(
+                'HOME' => getenv('HOME'),
+                'SSH_AUTH_SOCK' => getenv('SSH_AUTH_SOCK')
+            )
         ));
+        // Include logger if requested
+        if($output) {
+            $logger = new ConsoleLogger($output);
+            $repo->setLogger($logger);
+        }
+        return $repo;
     }
     
     /**
@@ -177,14 +190,38 @@ class Module
     }
 
     /**
-     * Change to another branch, creating it if it doesn't exist
+     * Gets local branches
      *
-     * @param string $branch
+     * @param string $remote If specified, select from remote instead. If ignored, select local
+     * @return array
      */
-    public function changeBranch($branch)
-    {
-        $repo = $this->getRepository();
-        $repo->run('checkout', array('-B', $branch));
+    public function getBranches($remote = null) {
+        // Query remotes
+        $result = $this->getRepository()->run('branch', $remote ? ['-r'] : []);
+
+        // Filter output
+        $branches = [];
+        foreach(preg_split('/\R/u', $result) as $line) {
+            $line = trim($line);
+            // Skip empty lines, or anything with whitespace in it
+            if(empty($line) || preg_match('#\s#', $line)) {
+                continue;
+            }
+            // Check remote prefix
+            if($remote) {
+                $prefix = "{$remote}/";
+                if(stripos($line, $prefix) === 0) {
+                    $line = substr($line, strlen($prefix));
+                } else {
+                    // Skip if not a branch on this remote
+                    continue;
+                }
+            }
+
+            // Save branch
+            $branches[] = $line;
+        }
+        return $branches;
     }
 
     /**
@@ -216,6 +253,7 @@ class Module
      *
      * @param string $remote
      * @param bool $tags Push tags?
+     * @throws Exception
      */
     public function pushTo($remote = 'origin', $tags = false)
     {
@@ -234,5 +272,85 @@ class Module
 
         // Push
         $repo->run('push', $args);
+    }
+
+    /**
+     * Fetch all upstream changes
+     *
+     * @param OutputInterface $output
+     * @param string $remote
+     */
+    public function fetch(OutputInterface $output, $remote = 'origin') {
+        $this->getRepository($output)
+            ->run('fetch', array($remote));
+    }
+
+    /**
+     * Checkout given branch name.
+     *
+     * Note that this method respects ambiguous branch names (e.g. 3.1.0 branch which
+     * may have just been tagged as 3.1.0, and is about to get deleted).
+     *
+     * @param OutputInterface $output
+     * @param string $branch
+     * @param string $remote
+     */
+    public function checkout(OutputInterface $output, $branch, $remote = 'origin') {
+        // Check if local branch exists
+        $localBranches = $this->getBranches();
+        $remoteBranches = $this->getBranches($remote);
+        $repository = $this->getRepository($output);
+
+        // Make sure branch exists somewhere
+        if(!in_array($branch, $localBranches) && !in_array($branch, $remoteBranches)) {
+            throw new InvalidArgumentException("Branch {$branch} is not a local or remote branch");
+        }
+
+        // Check if we need to switch branch
+        if($this->getBranch() !== $branch) {
+            // Find source for branch to checkout from (must disambiguate from tags)
+            if (!in_array($branch, $localBranches)) {
+                $sourceRef = "{$remote}/{$branch}";
+            } else {
+                $sourceRef = "refs/heads/{$branch}";
+            }
+
+            // Checkout branch
+            $repository->run('checkout', [
+                '-B',
+                $branch,
+                $sourceRef,
+            ]);
+        }
+
+        // If branch is on live and local, we need to synchronise changes on local
+        // (but don't push!)
+        if(in_array($branch, $localBranches) && in_array($branch, $remoteBranches)) {
+            $repository->run('pull', [$remote, $branch]);
+        }
+    }
+
+    /**
+     * Get composer.json as array format
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getComposerData() {
+        $path = $this->getDirectory() . '/composer.json';
+        if(!file_exists($path)) {
+            throw new Exception("No composer.json found in module " . $this->getName());
+        }
+        return json_decode(file_get_contents($path), true);
+    }
+
+    /**
+     * Get composer name
+     *
+     * @return string
+     */
+    public function getComposerName() {
+        $data = $this->getComposerData();
+        return $data['name'];
     }
 }
