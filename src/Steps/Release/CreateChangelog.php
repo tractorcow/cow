@@ -4,7 +4,7 @@ namespace SilverStripe\Cow\Steps\Release;
 
 use Exception;
 use SilverStripe\Cow\Commands\Command;
-use SilverStripe\Cow\Model\ChangeLog;
+use SilverStripe\Cow\Model\Changelog;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,13 +12,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates a new changelog
  */
-class CreateChangeLog extends ModuleStep
+class CreateChangelog extends ModuleStep
 {
     /**
      * @var ReleaseVersion
      */
     protected $version;
-    
+
     /**
      *
      * @var ReleaseVersion
@@ -28,7 +28,7 @@ class CreateChangeLog extends ModuleStep
     /**
      * Paths to check for changelog folder
      *
-     * @var type
+     * @var array
      */
     protected $paths = array(
         "framework/docs/en/04_Changelogs",
@@ -66,7 +66,7 @@ class CreateChangeLog extends ModuleStep
         $this->log($output, "Generating changelog content");
 
         // Generate changelog content
-        $changelog = new ChangeLog($this->getModules(), $this->from);
+        $changelog = new Changelog($this->getModules(), $this->from);
         $content = $changelog->getMarkdown($output);
 
         // Now we need to merge this content with the file, or otherwise create it
@@ -101,6 +101,7 @@ class CreateChangeLog extends ModuleStep
      * Find best changelog folder for this repo
      *
      * @return string
+     * @throws Exception
      */
     protected function getChangelogFolder()
     {
@@ -123,7 +124,7 @@ class CreateChangeLog extends ModuleStep
      * @param string $content
      * @param string $path
      */
-    protected function writeChangeLog(OutputInterface $output, $content, $path)
+    protected function writeChangelog(OutputInterface $output, $content, $path)
     {
         $header = $this->getFileHeader($output, $path);
         file_put_contents($path, $header.$content);
@@ -131,6 +132,10 @@ class CreateChangeLog extends ModuleStep
 
     /**
      * Get header component to put before the changelog content
+     *
+     * @param OutputInterface $output
+     * @param string $path File path to check for existing header
+     * @return string
      */
     protected function getFileHeader(OutputInterface $output, $path)
     {
@@ -161,7 +166,8 @@ class CreateChangeLog extends ModuleStep
      * Commit changes to git
      *
      * @param OutputInterface $output
-     * @param type $path
+     * @param string $path
+     * @throws Exception
      */
     public function commitChanges(OutputInterface $output, $path)
     {

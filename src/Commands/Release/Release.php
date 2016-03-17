@@ -5,7 +5,7 @@ namespace SilverStripe\Cow\Commands\Release;
 use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Release\CreateBranch;
-use SilverStripe\Cow\Steps\Release\CreateChangeLog;
+use SilverStripe\Cow\Steps\Release\CreateChangelog;
 use SilverStripe\Cow\Steps\Release\CreateProject;
 use SilverStripe\Cow\Steps\Release\RunTests;
 use SilverStripe\Cow\Steps\Release\UpdateTranslations;
@@ -21,7 +21,7 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
 class Release extends Command
 {
     protected $name = 'release';
-    
+
     protected $description = 'Execute each release step in order to publish a new version';
 
     const BRANCH_AUTO = 'auto';
@@ -55,17 +55,17 @@ class Release extends Command
         // Change to the correct temp branch (if given)
         $branch = new CreateBranch($this, $directory, $branch, $modules);
         $branch->run($this->input, $this->output);
-        
+
         // Update all translations
         $translate = new UpdateTranslations($this, $directory, $modules);
         $translate->run($this->input, $this->output);
-        
+
         // Run tests
         $test = new RunTests($this, $directory);
         $test->run($this->input, $this->output);
 
         // Generate changelog
-        $changelogs = new CreateChangeLog($this, $version, $fromVersion, $directory, $modules);
+        $changelogs = new CreateChangelog($this, $version, $fromVersion, $directory, $modules);
         $changelogs->run($this->input, $this->output);
 
         // Output completion
