@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A changelog which can be generated from a project
  */
-class ChangeLog
+class Changelog
 {
     /**
      * List of source modules
@@ -36,7 +36,7 @@ class ChangeLog
 
     /**
      * Get the list of changes for this module
-     * 
+     *
      * @param OutputInterface $output
      * @param Module $module
      * @return array
@@ -44,7 +44,7 @@ class ChangeLog
     protected function getModuleLog(OutputInterface $output, Module $module)
     {
         $items = array();
-        
+
         // Get raw log
         $fromVersion = $this->fromVersion->getValue();
         $range = $fromVersion."..HEAD";
@@ -103,7 +103,7 @@ class ChangeLog
             if (empty($commits)) {
                 continue;
             }
-            
+
             $output .= "\n### $groupName\n\n";
             foreach ($commits as $commit) {
                 $output .= $commit->getMarkdown();
@@ -137,7 +137,7 @@ class ChangeLog
 
         // List types
         $groupedByType = array();
-        foreach (ChangeLogItem::get_types() as $type) {
+        foreach (ChangelogItem::get_types() as $type) {
             $groupedByType[$type] = array();
         }
 

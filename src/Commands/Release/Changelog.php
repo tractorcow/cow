@@ -2,23 +2,23 @@
 
 namespace SilverStripe\Cow\Commands\Release;
 
-use SilverStripe\Cow\Steps\Release\CreateChangeLog;
+use SilverStripe\Cow\Steps\Release\CreateChangelog;
 
 /**
  * Description of Create
  *
  * @author dmooyman
  */
-class ChangeLog extends Release
+class Changelog extends Release
 {
     /**
      *
      * @var string
      */
     protected $name = 'release:changelog';
-    
+
     protected $description = 'Generate changelog';
-    
+
     protected function fire()
     {
         // Get arguments
@@ -28,7 +28,7 @@ class ChangeLog extends Release
         $modules = $this->getReleaseModules($directory);
 
         // Steps
-        $step = new CreateChangeLog($this, $version, $fromVersion, $directory, $modules);
+        $step = new CreateChangelog($this, $version, $fromVersion, $directory, $modules);
         $step->run($this->input, $this->output);
     }
 }

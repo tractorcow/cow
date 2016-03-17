@@ -8,18 +8,18 @@ use Gitonomy\Git\Commit;
 /**
  * Represents a line-item in a changelog
  */
-class ChangeLogItem
+class ChangelogItem
 {
     /**
      * @var Module
      */
     protected $module;
-    
+
     /**
      * @var Commit
      */
     protected $commit;
-    
+
     /**
      * Rules for ignoring commits
      *
@@ -84,7 +84,7 @@ class ChangeLogItem
         $this->module = $module;
         $this->commit = $commit;
     }
-    
+
     /**
      * Get the raw commit
      *
@@ -94,10 +94,10 @@ class ChangeLogItem
     {
         return $this->commit;
     }
-    
+
     /**
      * Should this commit be ignored?
-     * 
+     *
      * @return boolean
      */
     public function isIgnored()
@@ -186,12 +186,12 @@ class ChangeLogItem
                 }
             }
         }
-        
+
         // Fallback check for CVE (not at start of string)
         if ($this->getSecurityCVE()) {
             return 'Security';
         }
-        
+
         return null;
     }
 
