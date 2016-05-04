@@ -63,7 +63,7 @@ class CreateBranch extends ModuleStep
                     $output,
                     "Branching module ".$module->getName()." from <info>{$thisBranch}</info> to <info>{$branch}</info>"
                 );
-                $module->checkout($output, $branch);
+                $module->checkout($output, $branch, 'origin', true);
             }
         }
         $this->log($output, 'Branching complete');

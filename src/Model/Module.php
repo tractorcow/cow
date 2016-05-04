@@ -20,14 +20,14 @@ class Module
      * @var Project
      */
     protected $parent;
-    
+
     /**
      * Module name
      *
      * @var string
      */
     protected $name;
-    
+
     /**
      * Directory of this module
      * Doesn't always match name (e.g. installer)
@@ -35,13 +35,13 @@ class Module
      * @var string
      */
     protected $directory;
-    
+
     public function __construct($directory, $name, Project $parent = null)
     {
         $this->directory = realpath($directory);
         $this->name = $name;
         $this->parent = $parent;
-        
+
         if (!$this->isValid()) {
             throw new InvalidArgumentException("No module in directory \"{$this->directory}\"");
         }
@@ -98,7 +98,7 @@ class Module
     {
         return $this->getDirectory();
     }
-    
+
     /**
      * A project is valid if it has a root composer.json
      */
@@ -126,10 +126,10 @@ class Module
     {
         return $this->name;
     }
-    
+
     /**
      * Get github team name (normally 'silverstripe')
-     * 
+     *
      * @return string
      */
     public function getTeam()
@@ -141,10 +141,10 @@ class Module
                 return 'silverstripe';
         }
     }
-    
+
     /**
      * Get link to github module
-     * 
+     *
      * @return string
      */
     public function getLink()
@@ -175,7 +175,7 @@ class Module
         }
         return $repo;
     }
-    
+
     /**
      * Figure out the branch this composer is installed against
      */
@@ -294,8 +294,10 @@ class Module
      * @param OutputInterface $output
      * @param string $branch
      * @param string $remote
+     * @param bool $canCreate Set to true to allow creation of new branches
+     * if not found. Branch will be created from current head.
      */
-    public function checkout(OutputInterface $output, $branch, $remote = 'origin') {
+    public function checkout(OutputInterface $output, $branch, $remote = 'origin', $canCreate = false) {
         // Check if local branch exists
         $localBranches = $this->getBranches();
         $remoteBranches = $this->getBranches($remote);
@@ -303,7 +305,13 @@ class Module
 
         // Make sure branch exists somewhere
         if(!in_array($branch, $localBranches) && !in_array($branch, $remoteBranches)) {
-            throw new InvalidArgumentException("Branch {$branch} is not a local or remote branch");
+            if(!$canCreate) {
+                throw new InvalidArgumentException("Branch {$branch} is not a local or remote branch");
+            }
+
+            // Create branch
+            $repository->run('checkout', ['-B', $branch]);
+            return;
         }
 
         // Check if we need to switch branch
