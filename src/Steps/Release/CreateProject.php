@@ -17,7 +17,7 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
 class CreateProject extends Step
 {
     protected $package = 'silverstripe/installer';
-    
+
     protected $stability = 'dev';
 
     /**
@@ -39,7 +39,7 @@ class CreateProject extends Step
     public function __construct(Command $command, ReleaseVersion $version, $directory = '.')
     {
         parent::__construct($command);
-        
+
         $this->version = $version;
         $this->directory = $directory ?: '.';
     }
@@ -68,12 +68,14 @@ class CreateProject extends Step
     /**
      * Determine installable versions composer knows about and can install
      *
+     * @param OutputInterface $output
      * @return array
+     * @throws Exception
      */
     protected function getAvailableVersions(OutputInterface $output)
     {
         $error = "Could not parse available versions from command \"composer show {$this->package}\"";
-        $output = $this->runCommand($output, array("composer", "show", $this->package), $error);
+        $output = $this->runCommand($output, array("composer", "show", $this->package, "--all"), $error);
 
         // Parse output
         if ($output && preg_match('/^versions\s*:\s*(?<versions>(\S.+\S))\s*$/m', $output, $matches)) {
@@ -108,7 +110,7 @@ class CreateProject extends Step
     protected function getBestVersion(OutputInterface $output)
     {
         $this->log($output, 'Determining best version to install');
-        
+
         // Determine best version to install
         $available = $this->getAvailableVersions($output);
         $versions = $this->version->getComposerVersions();
