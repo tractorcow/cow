@@ -19,7 +19,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  *      `./framework/sake dev/tasks/i18nTextCollectorTask "flush=all" "merge=1"
  *  - Detect all new JS translations in a similar way (todo)
  *  - Generate javascript from js source files
- *      `phing -Dmodule=my-module translation-generate-javascript-for-module`
  *  - Push up all source translations
  *      `tx push -s`
  *  - Commit changes to source control (without push)
