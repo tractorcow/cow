@@ -27,7 +27,7 @@ class UpdateTranslations extends ModuleStep
 {
     /**
      * Min tx client version
-     
+
      * @var string
      */
     protected $txVersion = '0.11';
@@ -45,6 +45,17 @@ class UpdateTranslations extends ModuleStep
      * @var bool
      */
     protected $push;
+
+    /**
+     * Map of file paths to original JS master files.
+     * This is necessary prior to pulling master translations, since we need to do a
+     * post-pull merge locally, before pushing up back to transifex. Unlike PHP
+     * translations, text collector is unable to re-generate javascript translations, so
+     * instead we back them up here.
+     *
+     * @var array
+     */
+    protected $originalJSMasters = array();
 
     /**
      * Create a new translation step
@@ -71,7 +82,9 @@ class UpdateTranslations extends ModuleStep
         $modules = $this->getModules();
         $this->log($output, sprintf("Updating translations for %d module(s)", count($modules)));
         $this->checkVersion($output);
+        $this->storeJavascript($output, $modules);
         $this->pullSource($output, $modules);
+        $this->mergeJavascriptMasters($output);
         $this->collectStrings($output, $modules);
         $this->generateJavascript($output, $modules);
         $this->pushSource($output, $modules);
@@ -81,7 +94,7 @@ class UpdateTranslations extends ModuleStep
 
     /**
      * Test that tx tool is installed
-     * 
+     *
      * @param OutputInterface $output
      * @throws InvalidArgumentException
      */
@@ -97,8 +110,56 @@ class UpdateTranslations extends ModuleStep
     }
 
     /**
+     * Backup local javascript masters
+     *
+     * @param OutputInterface $output
+     * @param Module[] $modules
+     */
+    protected function storeJavascript(OutputInterface $output, $modules) {
+        $this->log($output, "Backing up local javascript masters");
+        // Backup files prior to replacing local copies with transifex master
+        $this->originalJSMasters = [];
+        foreach ($modules as $module) {
+            $jsPath = $module->getJSLangDirectory();
+            foreach ((array)$jsPath as $path) {
+                $masterPath = "{$path}/src/en.js";
+                if(file_exists($masterPath)) {
+                    $masterJSON = json_decode(file_get_contents($masterPath), true);
+                    $this->originalJSMasters[$masterPath] = $masterJSON;
+                }
+            }
+        }
+        $this->log($output, "Finished backing up " . count($this->originalJSMasters) . " javascript masters");
+    }
+
+    /**
+     * Merge back master files with any local contents
+     *
+     * @param OutputInterface $output
+     */
+    protected function mergeJavascriptMasters(OutputInterface $output) {
+        // skip if no translations for this module
+        if(empty($this->originalJSMasters)) {
+            return;
+        }
+        $this->log($output, "Merging local javascript masters");
+        foreach ($this->originalJSMasters as $path => $contentJSON) {
+            if(file_exists($path)) {
+                $masterJSON = json_decode(file_get_contents($path), true);
+                $contentJSON = array_merge($masterJSON, $contentJSON);
+            }
+            // Re-order values
+            ksort($contentJSON);
+
+            // Write back to local
+            file_put_contents($path, json_encode($contentJSON, JSON_PRETTY_PRINT));
+        }
+        $this->log($output, "Finished merging " . count($this->originalJSMasters) . " javascript masters");
+    }
+
+    /**
      * Update sources from transifex
-     * 
+     *
      * @param OutputInterface $output
      * @param Module[] $modules List of modules
      */
@@ -173,7 +234,7 @@ class UpdateTranslations extends ModuleStep
 
     /**
      * Process all javascript in a given path
-     * 
+     *
      * @param OutputInterface $output
      * @param string $base Base directory of the module
      * @param string $path Path to the location of JS files
@@ -223,7 +284,7 @@ TMPL;
         }
         return $count;
     }
-    
+
     /**
      * Push source updates to transifex
      *
@@ -244,7 +305,7 @@ TMPL;
             $this->runCommand($output, $pushCommand, "Error pushing module {$moduleName} to origin");
         }
     }
-    
+
     /**
      * Commit changes for all modules
      *
@@ -254,7 +315,7 @@ TMPL;
     public function commitChanges(OutputInterface $output, $modules)
     {
         $this->log($output, 'Committing translations to git');
-        
+
         foreach ($modules as $module) {
             $repo = $module->getRepository();
 
@@ -290,7 +351,7 @@ TMPL;
     protected function getModules()
     {
         $modules = parent::getModules();
-        
+
         // Get only modules with translations
         return array_filter($modules, function (Module $module) {
             // Automatically skip un-translateable modules
