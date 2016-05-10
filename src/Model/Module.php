@@ -76,12 +76,17 @@ class Module
      */
     public function getJSLangDirectory()
     {
-        $dir = $this->getMainDirectory() . '/javascript/lang';
+        $langBasePath = 'client/lang'; // 4.x+ style
+        if (!file_exists($this->getMainDirectory() . '/' . $langBasePath)) {
+            $langBasePath = 'javascript/lang'; // 3.x style
+        }
+        
+        $dir = $this->getMainDirectory() . '/' . $langBasePath;
 
         // Special case for framework which has a nested 'admin' submodule
         if ($this->getName() === 'framework') {
             return array(
-                $this->getMainDirectory() . '/admin/javascript/lang',
+                $this->getMainDirectory() . '/admin/' . $langBasePath,
                 $dir
             );
         } else {
