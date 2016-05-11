@@ -3,9 +3,9 @@
 namespace SilverStripe\Cow\Steps\Release;
 
 use Exception;
+use SilverStripe\Cow\Commands\Command;
 use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Step;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,10 +33,8 @@ class Wait extends Step
     protected $version;
 
     /**
-     *
      * @param Command $command
-     * @param array $version
-     * @param type $directory
+     * @param ReleaseVersion $version
      */
     public function __construct(Command $command, ReleaseVersion $version)
     {
@@ -69,7 +67,7 @@ class Wait extends Step
             }
             // Wait
             $this->log($output, "Version {$version} not available; checking again in 20 seconds");
-            
+
             // Progress bar for 20 seconds
             $progress = new ProgressBar($output, 20);
             $progress->start();
@@ -90,12 +88,14 @@ class Wait extends Step
     /**
      * Determine installable versions composer knows about and can install
      *
+     * @param OutputInterface $output
      * @return array
+     * @throws Exception
      */
     protected function getAvailableVersions(OutputInterface $output)
     {
         $error = "Could not parse available versions from command \"composer show {$this->package}\"";
-        $output = $this->runCommand($output, array("composer", "show", $this->package), $error);
+        $output = $this->runCommand($output, array("composer", "show", $this->package, "--all"), $error);
 
         // Parse output
         if ($output && preg_match('/^versions\s*:\s*(?<versions>(\S.+\S))\s*$/m', $output, $matches)) {
