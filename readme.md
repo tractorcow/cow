@@ -123,3 +123,7 @@ execution with the list of directories that should be manually resolved. Once re
 committed), just run the command again and it should continue.
 
 `--interactive` mode will pause before each commit, to allow you to review changes.
+
+To push up branches once issues have been merged you can run this separately:
+
+`cow branch:push [<module>, ..] [--exclude] [-vvv]`

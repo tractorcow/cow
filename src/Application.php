@@ -42,6 +42,7 @@ class Application extends Console\Application
 
         // Branch commands
         $commands[] = new Commands\Branch\Merge();
+        $commands[] = new Commands\Branch\Push();
 
         return $commands;
     }
