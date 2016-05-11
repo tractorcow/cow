@@ -99,8 +99,16 @@ class MergeBranch extends ModuleStep
         $this->log($output, "Merging module <info>" . $module->getComposerName() . "</info>");
 
         $module->fetch($output);
-        $module->checkout($output, $this->getFrom());
-        $module->checkout($output, $this->getTo());
+
+        try {
+            $module->checkout($output, $this->getFrom());
+            $module->checkout($output, $this->getTo());
+        } catch(\Exception $ex) {
+            // Sometimes modules don't exist in either source or destination branch;
+            // Treat this as a warning rather than an error.
+            $this->log($output, "Skipping module with error: <error>" . $ex->getMessage() . "</error>");
+            return;
+        }
 
         try {
             // Create merge
