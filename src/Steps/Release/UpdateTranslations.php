@@ -125,12 +125,27 @@ class UpdateTranslations extends ModuleStep
                 $masterPath = "{$path}/src/en.js";
                 if(file_exists($masterPath)) {
                     $masterJSON = json_decode(file_get_contents($masterPath), true);
+                    $this->checkJsonDecode($masterPath);
                     $this->originalJSMasters[$masterPath] = $masterJSON;
                 }
             }
         }
         $this->log($output, "Finished backing up " . count($this->originalJSMasters) . " javascript masters");
     }
+
+    /**
+     * Check for errors in the last json_decode
+     *
+     * @param string $path
+     * @throws \Exception
+     */
+    protected function checkJsonDecode($path) {
+        if(json_last_error()) {
+            $message = json_last_error_msg();
+            throw new \Exception("Error json decoding file {$path}: {$message}");
+        }
+    }
+
 
     /**
      * Merge back master files with any local contents
