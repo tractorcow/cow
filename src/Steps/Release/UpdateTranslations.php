@@ -81,6 +81,9 @@ class UpdateTranslations extends ModuleStep
     {
         $modules = $this->getModules();
         $this->log($output, sprintf("Updating translations for %d module(s)", count($modules)));
+        if($this->getVersionConstraint()) {
+            $this->log($output, sprintf("Note: Modules filtered by version %s", $this->getVersionConstraint()));
+        }
         $this->checkVersion($output);
         $this->storeJavascript($output, $modules);
         $this->pullSource($output, $modules);

@@ -35,6 +35,14 @@ abstract class ModuleStep extends Step
     protected $listIsExclusive;
 
     /**
+     * Set version constraint for filtering modules in this step.
+     * Will be ignored if $modules is non-empty and $listIsExclusive is false.
+     *
+     * @var string
+     */
+    protected $versionConstraint = 'self.version';
+
+    /**
      * Create a step
      *
      * @param Command $command
@@ -45,7 +53,7 @@ abstract class ModuleStep extends Step
     public function __construct(Command $command, $directory = '.', $modules = array(), $listIsExclusive = false)
     {
         parent::__construct($command);
-        
+
         $this->project = new Project($directory);
         $this->modules = $modules;
         $this->listIsExclusive = $listIsExclusive;
@@ -60,7 +68,7 @@ abstract class ModuleStep extends Step
     {
         return $this
             ->getProject()
-            ->getModules($this->modules, $this->listIsExclusive);
+            ->getModules($this->modules, $this->listIsExclusive, $this->getVersionConstraint());
     }
 
     /**
@@ -71,5 +79,23 @@ abstract class ModuleStep extends Step
     public function getProject()
     {
         return $this->project;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVersionConstraint()
+    {
+        return $this->versionConstraint;
+    }
+
+    /**
+     * @param string $versionConstraint
+     * @return $this
+     */
+    public function setVersionConstraint($versionConstraint)
+    {
+        $this->versionConstraint = $versionConstraint;
+        return $this;
     }
 }

@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 /**
  * Represents information about a project in a given directory
- * 
+ *
  * Is also the 'silverstripe-installer' module
  */
 class Project extends Module
@@ -30,15 +30,17 @@ class Project extends Module
     {
         return file_exists($directory . '/mysite');
     }
-    
+
     /**
      * Gets the list of self.version modules in this installer
      *
      * @param array $filter Optional list of modules to filter
      * @param bool $listIsExclusive Set to true if this list is exclusive
+     * @param string $versionConstraint root composer.json version constraint.
+     * Ignored if $listIsExclusive is set to true and $filter contains modules.
      * @return Module[]
      */
-    public function getModules($filter = array(), $listIsExclusive = false)
+    public function getModules($filter = array(), $listIsExclusive = false, $versionConstraint = 'self.version')
     {
         $composer = $this->getComposerData();
 
@@ -47,7 +49,7 @@ class Project extends Module
         if (empty($filter) || in_array($this->getName(), $filter) != $listIsExclusive) {
             $modules[] = $this;
         }
-        
+
         // Search all directories
         foreach (glob($this->directory."/*", GLOB_ONLYDIR) as $dir) {
             // Skip non-modules
@@ -62,12 +64,12 @@ class Project extends Module
             }
             $module = new Module($dir, $name, $this);
 
-            // Filter by self.version module,
+            // Filter by $versionConstraint module,
             // but let whitelisted queries to override this
-            if(empty($filter) || $listIsExclusive) {
+            if ($versionConstraint && (empty($filter) || $listIsExclusive)) {
                 $composerName = $module->getComposerName();
                 if (!isset($composer['require'][$composerName]) ||
-                    ($composer['require'][$composerName] !== 'self.version')
+                    ($composer['require'][$composerName] !== $versionConstraint)
                 ) {
                     continue;
                 }
