@@ -127,3 +127,10 @@ committed), just run the command again and it should continue.
 To push up branches once issues have been merged you can run this separately:
 
 `cow branch:push [<module>, ..] [--exclude] [-vvv]`
+
+If you simply want to checkout a specific branch on all modules, you can use this:
+
+`cow branch:checkout <branch> [<module>, ..] [--exclude] [--remote=<remote>] [-vvv]
+
+This will switch to the given branch, even if on the remote only, and pull down the
+latest changes.
