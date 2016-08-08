@@ -9,7 +9,6 @@ use SilverStripe\Cow\Steps\Release\ModuleStep;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * Class MergeBranch
@@ -49,7 +48,7 @@ class MergeBranch extends ModuleStep
      */
     protected $conflicts = [];
 
-    public function __construct(Command $command, $directory = '.', $modules = array(), $listIsExclusive = false, $from, $to, $push, $interactive)
+    public function __construct(Command $command, $directory, $modules, $listIsExclusive, $from, $to, $push, $interactive)
     {
         parent::__construct($command, $directory, $modules, $listIsExclusive);
         $this->setFrom($from);
@@ -154,7 +153,7 @@ class MergeBranch extends ModuleStep
 
             // Commit merge
             $repository->run('commit', ['-m', $message]);
-            $this->Log($output, "Merge successful!");
+            $this->log($output, "Merge successful!");
 
             // Do upstream push
             if($this->getPush()) {
