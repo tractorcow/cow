@@ -80,7 +80,7 @@ class Module
         if (!file_exists($this->getMainDirectory() . '/' . $langBasePath)) {
             $langBasePath = 'javascript/lang'; // 3.x style
         }
-        
+
         $dir = $this->getMainDirectory() . '/' . $langBasePath;
 
         // Special case for framework which has a nested 'admin' submodule
@@ -208,6 +208,10 @@ class Module
         $branches = [];
         foreach(preg_split('/\R/u', $result) as $line) {
             $line = trim($line);
+
+            // Strip "current branch" indicator. E.g. "* 3.3.3"
+            $line = preg_replace('/\\*\s+/', '', $line);
+
             // Skip empty lines, or anything with whitespace in it
             if(empty($line) || preg_match('#\s#', $line)) {
                 continue;
