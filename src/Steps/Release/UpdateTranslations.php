@@ -111,8 +111,11 @@ class UpdateTranslations extends ModuleStep
     {
         $error = "translate requires transifex {$this->txVersion} at least. "
             . "Run 'pip install transifex-client==0.11b3' to update.";
+
+        // Get version
         $result = $this->runCommand($output, array("tx", "--version"), $error);
-        if (!version_compare($result, $this->txVersion, '<')) {
+        $result = preg_replace('/\s+/', '', $result);
+        if (version_compare($result, $this->txVersion, '<')) {
             throw new InvalidArgumentException($error ." Current version: ".$result);
         }
 
