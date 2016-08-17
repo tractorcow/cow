@@ -26,7 +26,13 @@ class Publish extends Release
         $this
             ->addArgument('version', InputArgument::REQUIRED, 'Exact version tag to release this project as')
             ->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to release project from')
-            ->addOption('aws-profile', null, InputOption::VALUE_REQUIRED, "AWS profile to use for upload", "silverstripe");
+            ->addOption(
+                'aws-profile',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "AWS profile to use for upload",
+                "silverstripe"
+            );
     }
 
     protected function fire()
@@ -40,7 +46,7 @@ class Publish extends Release
         // Tag
         $tag = new TagModules($this, $version, $directory, $modules);
         $tag->run($this->input, $this->output);
-        
+
         // Push tag & branch
         $push = new PushRelease($this, $directory, $modules);
         $push->run($this->input, $this->output);

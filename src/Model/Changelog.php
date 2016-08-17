@@ -23,9 +23,19 @@ class Changelog
     protected $fromVersion;
 
     /**
+     * Groups changes by type (e.g. bug, enhancement, etc)
+     */
+    const FORMAT_GROUPED = 'grouped';
+
+    /**
+     * Formats list as flat list
+     */
+    const FORMAT_FLAT = 'flat';
+
+    /**
      * Create a new changelog
      *
-     * @param array $modules Source of modules to generate changelog from
+     * @param Module[] $modules Source of modules to generate changelog from
      * @param ReleaseVersion $fromVersion
      */
     public function __construct(array $modules, ReleaseVersion $fromVersion)
@@ -73,9 +83,22 @@ class Changelog
      * Get all changes grouped by type
      *
      * @param OutputInterface $output
-     * @return array
+     * @return ChangelogItem[]
      */
     protected function getGroupedChanges(OutputInterface $output)
+    {
+        // Sort by type
+        $changes = $this->getChanges($output);
+        return $this->sortByType($changes);
+    }
+
+    /**
+     * Gets all changes in a flat list
+     *
+     * @param OutputInterface $output
+     * @return ChangelogItem[]
+     */
+    protected function getChanges(OutputInterface $output)
     {
         $changes = array();
         foreach ($this->getModules() as $module) {
@@ -83,17 +106,35 @@ class Changelog
             $changes = array_merge($changes, $moduleChanges);
         }
 
-        // Sort by type
-        return $this->sortByType($changes);
+        return $this->sortByDate($changes);
     }
 
     /**
      * Generate output in markdown format
      *
-     * @param OutputInterface
+     * @param OutputInterface $output
+     * @param string $formatType A format specified by a FORMAT_* constant
      * @return string
      */
-    public function getMarkdown(OutputInterface $output)
+    public function getMarkdown(OutputInterface $output, $formatType)
+    {
+        switch ($formatType) {
+            case self::FORMAT_GROUPED:
+                return $this->getMarkdownGrouped($output);
+            case self::FORMAT_FLAT:
+                return $this->getMarkdownFlat($output);
+            default:
+                throw new \InvalidArgumentException("Unknown changelog format $formatType");
+        }
+    }
+
+    /**
+     * Generates grouped markdown
+     *
+     * @param OutputInterface $output
+     * @return string
+     */
+    protected function getMarkdownGrouped(OutputInterface $output)
     {
         $groupedLog = $this->getGroupedChanges($output);
 
@@ -106,8 +147,100 @@ class Changelog
 
             $output .= "\n### $groupName\n\n";
             foreach ($commits as $commit) {
-                $output .= $commit->getMarkdown();
+                /** @var ChangelogItem $commit */
+                $output .= $commit->getMarkdown($this->getLineFormat(), $this->getSecurityFormat());
             }
+        }
+
+        return $output;
+    }
+
+    /**
+     * Custom format string for line items
+     *
+     * @var string
+     */
+    protected $lineFormat = null;
+
+    /**
+     * @return ReleaseVersion
+     */
+    public function getFromVersion()
+    {
+        return $this->fromVersion;
+    }
+
+    /**
+     * @param ReleaseVersion $fromVersion
+     * @return $this
+     */
+    public function setFromVersion(ReleaseVersion $fromVersion)
+    {
+        $this->fromVersion = $fromVersion;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLineFormat()
+    {
+        return $this->lineFormat;
+    }
+
+    /**
+     * @param string $lineFormat
+     * @return $this
+     */
+    public function setLineFormat($lineFormat)
+    {
+        $this->lineFormat = $lineFormat;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSecurityFormat()
+    {
+        return $this->securityFormat;
+    }
+
+    /**
+     * @param string $securityFormat
+     * @return Changelog
+     */
+    public function setSecurityFormat($securityFormat)
+    {
+        $this->securityFormat = $securityFormat;
+        return $this;
+    }
+
+    /**
+     * Custom format string for security details
+     *
+     * @var string
+     */
+    protected $securityFormat = null;
+
+    /**
+     * Generates markdown as a flat list
+     *
+     * @param OutputInterface $output
+     * @return string
+     */
+    protected function getMarkdownFlat(OutputInterface $output)
+    {
+        $commits = $this->getChanges($output);
+
+        $output = '';
+        foreach ($commits as $commit) {
+            // Skip untyped commits
+            if (!$commit->getType()) {
+                continue;
+            }
+            /** @var ChangelogItem $commit */
+            $output .= $commit->getMarkdown($this->getLineFormat(), $this->getSecurityFormat());
         }
 
         return $output;
@@ -122,22 +255,9 @@ class Changelog
      */
     protected function sortByType($commits)
     {
-        // sort by timestamp newest to oldest
-        usort($commits, function ($a, $b) {
-            $aTime = $a->getDate();
-            $bTime = $b->getDate();
-            if ($bTime == $aTime) {
-                return 0;
-            } elseif ($bTime < $aTime) {
-                return -1;
-            } else {
-                return 1;
-            }
-        });
-
         // List types
         $groupedByType = array();
-        foreach (ChangelogItem::get_types() as $type) {
+        foreach (ChangelogItem::getTypes() as $type) {
             $groupedByType[$type] = array();
         }
 
@@ -150,6 +270,27 @@ class Changelog
         }
 
         return $groupedByType;
+    }
+
+    /**
+     * @param array $commits
+     * @return array
+     */
+    protected function sortByDate($commits)
+    {
+        // sort by timestamp newest to oldest
+        usort($commits, function (ChangelogItem $a, ChangelogItem $b) {
+            $aTime = $a->getDate();
+            $bTime = $b->getDate();
+            if ($bTime == $aTime) {
+                return 0;
+            } elseif ($bTime < $aTime) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+        return $commits;
     }
 
     /**

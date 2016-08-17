@@ -12,7 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Synchronise all translations with transifex, merging these with strings detected in code files
  *
  * Basic process follows:
- *  - Set mtime on all local files to long ago (1 year in the past?) because tx pull breaks on new files and won't update them
+ *  - Set mtime on all local files to long ago (1 year in the past?) because tx pull breaks on new files and
+ *    won't update them
  *  - Pull all source files from transifex with the below:
  *      `tx pull -a -s -f --minimum-perc=10`
  *  - Detect all new translations, making sure to merge in changes
@@ -66,8 +67,13 @@ class UpdateTranslations extends ModuleStep
      * @param bool $listIsExclusive If this list is exclusive. If false, this is inclusive
      * @param bool $doPush Do git push at end
      */
-    public function __construct(Command $command, $directory, $modules = array(), $listIsExclusive = false, $doPush = false)
-    {
+    public function __construct(
+        Command $command,
+        $directory,
+        $modules = array(),
+        $listIsExclusive = false,
+        $doPush = false
+    ) {
         parent::__construct($command, $directory, $modules, $listIsExclusive);
         $this->push = $doPush;
     }
@@ -81,7 +87,7 @@ class UpdateTranslations extends ModuleStep
     {
         $modules = $this->getModules();
         $this->log($output, sprintf("Updating translations for %d module(s)", count($modules)));
-        if($this->getVersionConstraint()) {
+        if ($this->getVersionConstraint()) {
             $this->log($output, sprintf("Note: Modules filtered by version %s", $this->getVersionConstraint()));
         }
         $this->checkVersion($output);
@@ -103,7 +109,8 @@ class UpdateTranslations extends ModuleStep
      */
     protected function checkVersion(OutputInterface $output)
     {
-        $error = "translate requires transifex {$this->txVersion} at least. Run 'pip install transifex-client==0.11b3' to update.";
+        $error = "translate requires transifex {$this->txVersion} at least. "
+            . "Run 'pip install transifex-client==0.11b3' to update.";
         $result = $this->runCommand($output, array("tx", "--version"), $error);
         if (!version_compare($result, $this->txVersion, '<')) {
             throw new InvalidArgumentException($error ." Current version: ".$result);
@@ -118,7 +125,8 @@ class UpdateTranslations extends ModuleStep
      * @param OutputInterface $output
      * @param Module[] $modules
      */
-    protected function storeJavascript(OutputInterface $output, $modules) {
+    protected function storeJavascript(OutputInterface $output, $modules)
+    {
         $this->log($output, "Backing up local javascript masters");
         // Backup files prior to replacing local copies with transifex master
         $this->originalJSMasters = [];
@@ -126,7 +134,7 @@ class UpdateTranslations extends ModuleStep
             $jsPath = $module->getJSLangDirectory();
             foreach ((array)$jsPath as $path) {
                 $masterPath = "{$path}/src/en.js";
-                if(file_exists($masterPath)) {
+                if (file_exists($masterPath)) {
                     $masterJSON = json_decode(file_get_contents($masterPath), true);
                     $this->checkJsonDecode($masterPath);
                     $this->originalJSMasters[$masterPath] = $masterJSON;
@@ -142,8 +150,9 @@ class UpdateTranslations extends ModuleStep
      * @param string $path
      * @throws \Exception
      */
-    protected function checkJsonDecode($path) {
-        if(json_last_error()) {
+    protected function checkJsonDecode($path)
+    {
+        if (json_last_error()) {
             $message = json_last_error_msg();
             throw new \Exception("Error json decoding file {$path}: {$message}");
         }
@@ -155,14 +164,15 @@ class UpdateTranslations extends ModuleStep
      *
      * @param OutputInterface $output
      */
-    protected function mergeJavascriptMasters(OutputInterface $output) {
+    protected function mergeJavascriptMasters(OutputInterface $output)
+    {
         // skip if no translations for this module
-        if(empty($this->originalJSMasters)) {
+        if (empty($this->originalJSMasters)) {
             return;
         }
         $this->log($output, "Merging local javascript masters");
         foreach ($this->originalJSMasters as $path => $contentJSON) {
-            if(file_exists($path)) {
+            if (file_exists($path)) {
                 $masterJSON = json_decode(file_get_contents($path), true);
                 $contentJSON = array_merge($masterJSON, $contentJSON);
             }

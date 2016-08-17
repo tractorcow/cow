@@ -3,13 +3,9 @@
 namespace SilverStripe\Cow\Commands\Branch;
 
 use SilverStripe\Cow\Commands\Module\Module;
-use SilverStripe\Cow\Commands\Release\Release;
-use SilverStripe\Cow\Model\ReleaseVersion;
 use SilverStripe\Cow\Steps\Branch\MergeBranch;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Logger\ConsoleLogger;
-
 
 /**
  * Description of Create
@@ -45,11 +41,14 @@ class Merge extends Module
         $interactive = $this->getInputInteractive();
 
         // Bit of a sanity check on version
-        if(!$this->canMerge($from, $to)) {
-            throw new \InvalidArgumentException("{$to} seems like an older version that {$from}. Are you sure that's correct?");
+        if (!$this->canMerge($from, $to)) {
+            throw new \InvalidArgumentException(
+                "{$to} seems like an older version that {$from}. Are you sure that's correct?"
+            );
         }
 
         $merge = new MergeBranch($this, $directory, $modules, $listIsExclusive, $from, $to, $push, $interactive);
+        $merge->setVersionConstraint(null); // branch:merge doesn't filter by self.version
         $merge->run($this->input, $this->output);
     }
 
@@ -60,24 +59,25 @@ class Merge extends Module
      * @param string $to
      * @return bool
      */
-    protected function canMerge($from, $to) {
-        if($from === 'master') {
+    protected function canMerge($from, $to)
+    {
+        if ($from === 'master') {
             return false;
         }
-        if($to === 'master') {
+        if ($to === 'master') {
             return true;
         }
 
         // Allow if either $from or $to are non-numeric
-        if(!preg_match('/^(\d+)(.\d+)*$/', $from) || !preg_match('/^(\d+)(.\d+)*$/', $to)) {
+        if (!preg_match('/^(\d+)(.\d+)*$/', $from) || !preg_match('/^(\d+)(.\d+)*$/', $to)) {
             return true;
         }
 
         // Apply minor vs major rule (3.3 > 3 but not 3 > 3.3)
-        if(stripos($from, $to) === 0) {
+        if (stripos($from, $to) === 0) {
             return true;
         }
-        if(stripos($to, $from) === 0) {
+        if (stripos($to, $from) === 0) {
             return false;
         }
 
@@ -110,7 +110,8 @@ class Merge extends Module
      *
      * @return bool
      */
-    protected function getInputInteractive() {
+    protected function getInputInteractive()
+    {
         return $this->input->getOption('interactive');
     }
 }

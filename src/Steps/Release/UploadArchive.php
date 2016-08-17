@@ -18,7 +18,7 @@ class UploadArchive extends Step
 {
     /**
      * Path to upload to
-     * 
+     *
      * @var string
      */
     protected $basePath = "s3://silverstripe-ssorg-releases/sssites-ssorg-prod/assets/releases";
@@ -48,8 +48,12 @@ class UploadArchive extends Step
      * @param string $directory Where to translate
      * @param string $awsProfile Name of aws profile to use
      */
-    public function __construct(Command $command, ReleaseVersion $version, $directory = '.', $awsProfile = 'silverstripe')
-    {
+    public function __construct(
+        Command $command,
+        ReleaseVersion $version,
+        $directory = '.',
+        $awsProfile = 'silverstripe'
+    ) {
         parent::__construct($command);
 
         $this->version = $version;

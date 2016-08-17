@@ -17,7 +17,7 @@ abstract class Step
      * @var Command
      */
     protected $command;
-    
+
     public function __construct(Command $command)
     {
         $this->setCommand($command);
@@ -68,7 +68,8 @@ abstract class Step
     /**
      * @return QuestionHelper
      */
-    protected function getQuestionHelper() {
+    protected function getQuestionHelper()
+    {
         return $this->getCommand()->getHelper('question');
     }
 
@@ -78,7 +79,8 @@ abstract class Step
      * To display errors/output make sure to run with -vvv
      *
      * @param OutputInterface $output
-     * @param string|array|Process $command An instance of Process or an array of arguments to escape and run or a command to run
+     * @param string|array|Process $command An instance of Process or an array of arguments to escape and run
+     * or a command to run
      * @param string|null $error An error message that must be displayed if something went wrong
      * @param bool $exceptionOnError If an error occurs, this message is an exception rather than a notice
      * @return bool|string Output, or false if error

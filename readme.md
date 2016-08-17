@@ -99,6 +99,12 @@ don't specify a list of modules then all modules will be translated. Specify 'in
 You can use `--push` option to push to origin at the end, or `--exclude` if your list of modules is the list
 to exclude. By default all modules are included, unless whitelisted or excluded.
 
+* `module:tag <module> <version> [--from=<from>] [--directory=<dir>] [-n] [-vvv]` Will do a basic module release,
+pushing up the changelog to github via the github v3 API. In order for this to work you should setup a global
+environment variable `GITHUB_API_TOKEN` with an API token authenticated against yourself.
+See [these instructions](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)
+for generating this token.
+
 ## Branch helper
 
 When a release is done, the laborious task of merging up all changes begins. This is where it

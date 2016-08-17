@@ -54,7 +54,7 @@ class CreateProject extends Step
     public function run(InputInterface $input, OutputInterface $output)
     {
         // Check if output directory already exists
-        if (Project::exists_in($this->directory)) {
+        if (Project::existsIn($this->directory)) {
             $this->log($output, "Project already exists in target directory. Skipping project creation", "error");
             return;
         }

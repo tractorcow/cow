@@ -70,7 +70,9 @@ class Release extends Command
 
         // Output completion
         $this->output->writeln("<info>Success!</info> Release has been updated.");
-        $this->output->writeln("Please check the changes made by this command, and run <info>cow release:publish</info>");
+        $this->output->writeln(
+            "Please check the changes made by this command, and run <info>cow release:publish</info>"
+        );
     }
 
     /**
@@ -109,6 +111,7 @@ class Release extends Command
      * Determine the 'from' version for generating changelogs
      *
      * @param ReleaseVersion $version
+     * @return ReleaseVersion
      */
     protected function getInputFromVersion(ReleaseVersion $version)
     {
