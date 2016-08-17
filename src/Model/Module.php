@@ -133,18 +133,27 @@ class Module
     }
 
     /**
-     * Get github team name (normally 'silverstripe')
+     * Cached link
+     *
+     * @var string
+     */
+    protected $link = null;
+
+    /**
+     * Get github slug. E.g. silverstripe/silverstripe-framework, or null
+     * if not on github
      *
      * @return string
      */
-    public function getTeam()
+    public function getGithubSlug()
     {
-        switch ($this->name) {
-            case 'reports':
-                return 'silverstripe-labs';
-            default:
-                return 'silverstripe';
+        $remotes = $this->getRemotes();
+        foreach ($remotes as $remote) {
+            if (preg_match('#github.com/(?<slug>[^\\s/\\.]+/[^\\s/\\.]+)#', $remote, $matches)) {
+                return $matches['slug'];
+            }
         }
+        return null;
     }
 
     /**
@@ -154,9 +163,28 @@ class Module
      */
     public function getLink()
     {
-        $team = $this->getTeam();
+        if ($this->link) {
+            return $this->link;
+        }
+
+        $remotes = $this->getRemotes();
+        foreach ($remotes as $name => $remote) {
+            if (preg_match('/^http(s)?:/', $remote)) {
+                // Remove trailing .git
+                $remote = preg_replace('/\\.git$/', '', $remote);
+                $remote = rtrim($remote, '/') . '/';
+                return $this->link = $remote;
+            }
+        }
+
+        // Fallback to looking for github slug
+        if ($slug = $this->getGithubSlug()) {
+            return $this->link = "https://github.com/{$slug}/";
+        }
+
+        // Fallback to best guess
         $name = $this->getName();
-        return "https://github.com/{$team}/silverstripe-{$name}/";
+        return $this->link = "https://github.com/silverstripe/silverstripe-{$name}/";
     }
 
     /**
@@ -174,7 +202,7 @@ class Module
             )
         ));
         // Include logger if requested
-        if($output) {
+        if ($output) {
             $logger = new ConsoleLogger($output);
             $repo->setLogger($logger);
         }
@@ -200,26 +228,27 @@ class Module
      * @param string $remote If specified, select from remote instead. If ignored, select local
      * @return array
      */
-    public function getBranches($remote = null) {
+    public function getBranches($remote = null)
+    {
         // Query remotes
         $result = $this->getRepository()->run('branch', $remote ? ['-r'] : []);
 
         // Filter output
         $branches = [];
-        foreach(preg_split('/\R/u', $result) as $line) {
+        foreach (preg_split('/\R/u', $result) as $line) {
             $line = trim($line);
 
             // Strip "current branch" indicator. E.g. "* 3.3.3"
             $line = preg_replace('/\\*\s+/', '', $line);
 
             // Skip empty lines, or anything with whitespace in it
-            if(empty($line) || preg_match('#\s#', $line)) {
+            if (empty($line) || preg_match('#\s#', $line)) {
                 continue;
             }
             // Check remote prefix
-            if($remote) {
+            if ($remote) {
                 $prefix = "{$remote}/";
-                if(stripos($line, $prefix) === 0) {
+                if (stripos($line, $prefix) === 0) {
                     $line = substr($line, strlen($prefix));
                 } else {
                     // Skip if not a branch on this remote
@@ -231,6 +260,39 @@ class Module
             $branches[] = $line;
         }
         return $branches;
+    }
+
+    /**
+     * List of remotes as array in name => url format
+     *
+     * @return array
+     */
+    public function getRemotes()
+    {
+        // Query remotes
+        $result = $this->getRepository()->run('remote', ['-v']);
+
+        // Filter output
+        $remotes = [];
+        foreach (preg_split('/\R/u', $result) as $line) {
+            $line = trim($line);
+            if (preg_match('/^(?<name>\w+)\s+(?<url>\S+)/', $line, $matches)) {
+                $remotes[$matches['name']] = $matches['url'];
+            }
+        }
+
+        // Sort so that "origin" is first
+        uksort($remotes, function ($left, $right) {
+            if ($left === 'origin') {
+                return -1;
+            }
+            if ($right === 'origin') {
+                return 1;
+            }
+            return 0;
+        });
+
+        return $remotes;
     }
 
     /**
@@ -289,7 +351,8 @@ class Module
      * @param OutputInterface $output
      * @param string $remote
      */
-    public function fetch(OutputInterface $output, $remote = 'origin') {
+    public function fetch(OutputInterface $output, $remote = 'origin')
+    {
         $this->getRepository($output)
             ->run('fetch', array($remote));
     }
@@ -306,15 +369,16 @@ class Module
      * @param bool $canCreate Set to true to allow creation of new branches
      * if not found. Branch will be created from current head.
      */
-    public function checkout(OutputInterface $output, $branch, $remote = 'origin', $canCreate = false) {
+    public function checkout(OutputInterface $output, $branch, $remote = 'origin', $canCreate = false)
+    {
         // Check if local branch exists
         $localBranches = $this->getBranches();
         $remoteBranches = $this->getBranches($remote);
         $repository = $this->getRepository($output);
 
         // Make sure branch exists somewhere
-        if(!in_array($branch, $localBranches) && !in_array($branch, $remoteBranches)) {
-            if(!$canCreate) {
+        if (!in_array($branch, $localBranches) && !in_array($branch, $remoteBranches)) {
+            if (!$canCreate) {
                 throw new InvalidArgumentException("Branch {$branch} is not a local or remote branch");
             }
 
@@ -324,7 +388,7 @@ class Module
         }
 
         // Check if we need to switch branch
-        if($this->getBranch() !== $branch) {
+        if ($this->getBranch() !== $branch) {
             // Find source for branch to checkout from (must disambiguate from tags)
             if (!in_array($branch, $localBranches)) {
                 $sourceRef = "{$remote}/{$branch}";
@@ -342,7 +406,7 @@ class Module
 
         // If branch is on live and local, we need to synchronise changes on local
         // (but don't push!)
-        if(in_array($branch, $localBranches) && in_array($branch, $remoteBranches)) {
+        if (in_array($branch, $localBranches) && in_array($branch, $remoteBranches)) {
             $repository->run('pull', [$remote, $branch]);
         }
     }
@@ -353,9 +417,10 @@ class Module
      * @return array
      * @throws Exception
      */
-    public function getComposerData() {
+    public function getComposerData()
+    {
         $path = $this->getDirectory() . '/composer.json';
-        if(!file_exists($path)) {
+        if (!file_exists($path)) {
             throw new Exception("No composer.json found in module " . $this->getName());
         }
         return json_decode(file_get_contents($path), true);
@@ -366,7 +431,8 @@ class Module
      *
      * @return string
      */
-    public function getComposerName() {
+    public function getComposerName()
+    {
         $data = $this->getComposerData();
         return $data['name'];
     }

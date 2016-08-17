@@ -8,7 +8,6 @@ use SilverStripe\Cow\Steps\Release\ModuleStep;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-
 /**
  * Checks out a specific branch on a module, or list of modules.
  * Note: Unloke "merge", this command will simply warn of missing branches
@@ -45,7 +44,7 @@ class CheckoutBranch extends ModuleStep
     public function run(InputInterface $input, OutputInterface $output)
     {
         $this->log($output, "Checkout out <info>" . $this->getBranch() . "</info>");
-        foreach($this->getModules() as $module) {
+        foreach ($this->getModules() as $module) {
             $this->checkoutModule($input, $output, $module);
         }
         $this->log($output, "All modules were checked out");
@@ -59,14 +58,15 @@ class CheckoutBranch extends ModuleStep
      * @param Module $module
      * @throws \Exception
      */
-    protected function checkoutModule(InputInterface $input, OutputInterface $output, Module $module) {
+    protected function checkoutModule(InputInterface $input, OutputInterface $output, Module $module)
+    {
         $this->log($output, "Checking out module <info>" . $module->getComposerName() . "</info>");
 
         $module->fetch($output, $this->getRemote());
 
         try {
             $module->checkout($output, $this->getBranch(), $this->getRemote());
-        } catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             // Sometimes modules don't exist in either source or destination branch;
             // Treat this as a warning rather than an error.
             $this->log($output, "Skipping module with error: <error>" . $ex->getMessage() . "</error>");
@@ -109,5 +109,4 @@ class CheckoutBranch extends ModuleStep
     {
         return $this->remote ?: 'origin';
     }
-
 }

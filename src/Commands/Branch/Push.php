@@ -5,7 +5,6 @@ namespace SilverStripe\Cow\Commands\Branch;
 use SilverStripe\Cow\Commands\Module\Module;
 use SilverStripe\Cow\Steps\Release\PushRelease;
 
-
 /**
  * Pushes up changes to a branch
  */
@@ -25,6 +24,7 @@ class Push extends Module
         $listIsExclusive = $this->getInputExclude();
 
         $merge = new PushRelease($this, $directory, $modules, $listIsExclusive);
+        $merge->setVersionConstraint(null); // branch:push doesn't filter by self.version
         $merge->run($this->input, $this->output);
     }
 }

@@ -28,7 +28,7 @@ class ReleaseVersion
      * @var string|null
      */
     protected $stability;
-    
+
     /**
      *
      * @var int|null
@@ -41,9 +41,14 @@ class ReleaseVersion
      * @param string $version
      * @return bool|array Either false, or an array of parts
      */
-    public static function parse($version) {
-        $valid = preg_match('/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>rc|alpha|beta)(?<stabilityVersion>\d+)?)?$/', $version, $matches);
-        if(!$valid) {
+    public static function parse($version)
+    {
+        $valid = preg_match(
+            '/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\-(?<stability>rc|alpha|beta)(?<stabilityVersion>\d+)?)?$/',
+            $version,
+            $matches
+        );
+        if (!$valid) {
             return false;
         }
         return $matches;
@@ -75,42 +80,42 @@ class ReleaseVersion
     {
         return $this->getValue();
     }
-    
+
     public function getStability()
     {
         return $this->stability;
     }
-    
+
     public function setStability($stability)
     {
         $this->stability = $stability;
     }
-    
+
     public function getStabilityVersion()
     {
         return $this->stabilityVersion;
     }
-    
+
     public function setStabilityVersion($stabilityVersion)
     {
         $this->stabilityVersion = $stabilityVersion;
     }
-    
+
     public function getMajor()
     {
         return $this->major;
     }
-    
+
     public function setMajor($major)
     {
         $this->major = $major;
     }
-    
+
     public function getPatch()
     {
         return $this->patch;
     }
-    
+
     public function setPatch($patch)
     {
         $this->patch = $patch;
@@ -163,27 +168,27 @@ class ReleaseVersion
 
         return $versions;
     }
-    
+
     /**
      * Guess the best prior version to release as changelog
-     * 
+     *
      * @return ReleaseVersion
      */
     public function getPriorVersion()
     {
         $prior = clone $this;
-        
+
         // If beta2 or above, guess prior version to be beta1
         $stabilityVersion = $prior->getStabilityVersion();
         if ($stabilityVersion > 1) {
             $prior->setStabilityVersion($stabilityVersion - 1);
             return $prior;
         }
-        
+
         // Set prior version to stable only
         $prior->setStability(null);
         $prior->setStabilityVersion(null);
-        
+
         // If patch version is 0 we really can't guess
         $patch = $prior->getPatch();
         if (empty($patch)) {
@@ -191,7 +196,7 @@ class ReleaseVersion
                 "Can't guess version which comes before " . $this->getValue()
             );
         }
-        
+
         // Select prior patch version (e.g. 3.1.14 -> 3.1.13)
         $prior->setPatch($patch - 1);
         return $prior;

@@ -58,7 +58,8 @@ class Checkout extends Module
      *
      * @return string
      */
-    protected function getInputRemote() {
+    protected function getInputRemote()
+    {
         return $this->input->getOption('remote');
     }
 }

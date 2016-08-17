@@ -68,7 +68,7 @@ class ChangelogItem
      *
      * @return array
      */
-    public static function get_types()
+    public static function getTypes()
     {
         return array_keys(self::$types);
     }
@@ -142,21 +142,13 @@ class ChangelogItem
     }
 
     /**
-     * Get sanitised message (omit emails, tags, etc)
+     * Gets message with type tag stripped
      *
      * @return string markdown safe string
      */
-    public function getMessage()
+    public function getShortMessage()
     {
-        $message = $this->getRawMessage();
-
-        // Strip emails
-        $$message = preg_replace('/(<?[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}>?)/mi', '', $message);
-
-        // Condense git-style "From:" messages (remove preceding newline)
-        if (preg_match('/^From\:/mi', $message)) {
-            $message = preg_replace('/\n\n^(From\:)/mi', ' $1', $message);
-        }
+        $message = $this->getMessage();
 
         // Strip categorisation tags (API, BUG FIX, etc)
         foreach (self::$types as $rules) {
@@ -165,9 +157,28 @@ class ChangelogItem
             }
         }
 
+        return $message;
+    }
+
+    /**
+     * Gets message with only minimal sanitisation
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        $message = $this->getRawMessage();
+
+        // Strip emails
+        $message = preg_replace('/(<?[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}>?)/mi', '', $message);
+
+        // Condense git-style "From:" messages (remove preceding newline)
+        if (preg_match('/^From\:/mi', $message)) {
+            $message = preg_replace('/\n\n^(From\:)/mi', ' $1', $message);
+        }
+
         // Encode HTML tags
         $message = str_replace(array('<', '>'), array('&lt;', '&gt;'), $message);
-
         return $message;
     }
 
@@ -232,22 +243,53 @@ class ChangelogItem
     /**
      * Get markdown content for this line item, including end of line
      *
+     * @param string $format Format for line
+     * @param string $securityFormat Format for security CVE link
      * @return string
      */
-    public function getMarkdown()
+    public function getMarkdown($format = null, $securityFormat = null)
     {
-        $link = $this->getLink();
-        $shortHash = $this->getShortHash();
-        $date = $this->getDate()->format('Y-m-d');
-        $message = $this->getMessage();
-        $author = $this->getAuthor();
-		$content = " * {$date} [{$shortHash}]({$link}) {$message} ({$author})";
+        if (!isset($format)) {
+            $format = ' * {date} [{shortHash}]({link}) {shortMessage} ({author})';
+        }
+        $content = $this->formatString($format, [
+            'type' => $this->getType(),
+            'link' => $this->getLink(),
+            'shortHash' => $this->getShortHash(),
+            'date' => $this->getDate()->format('Y-m-d'),
+            'rawMessage' => $this->getRawMessage(), // Probably not safe to use
+            'message' => $this->getMessage(),
+            'shortMessage' => $this->getShortMessage(),
+            'author' => $this->getAuthor(),
+        ]);
 
         // Append security identifier
         if ($cve = $this->getSecurityCVE()) {
-            $content .= " - See [{$cve}]({$this->cveURL}{$cve})";
+            if (!isset($securityFormat)) {
+                $securityFormat = ' - See [{cve}]({cveURL})';
+            }
+            $content .= $this->formatString($securityFormat, [
+                'cve' => $cve,
+                'cveURL' => $this->cveURL . $cve
+            ]);
         }
 
         return $content . "\n";
+    }
+
+    /**
+     * Format a string with named args
+     *
+     * @param string $format
+     * @param array $arguments Arguments
+     * @return string
+     */
+    protected function formatString($format, $arguments)
+    {
+        $result = $format;
+        foreach ($arguments as $name => $value) {
+            $result = str_replace('{'.$name.'}', $value, $result);
+        }
+        return $result;
     }
 }

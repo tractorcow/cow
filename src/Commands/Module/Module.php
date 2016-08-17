@@ -21,7 +21,12 @@ abstract class Module extends Command
             'Optional list of modules to filter (separate by space)'
         );
         $this->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Module directory');
-        $this->addOption('exclude', 'e', InputOption::VALUE_NONE, "Makes list of modules exclusive instead of inclusive");
+        $this->addOption(
+            'exclude',
+            'e',
+            InputOption::VALUE_NONE,
+            "Makes list of modules exclusive instead of inclusive"
+        );
         $this->addOption('push', 'p', InputOption::VALUE_NONE, "Push to git origin if successful");
     }
 

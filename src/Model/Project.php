@@ -15,7 +15,7 @@ class Project extends Module
     {
         parent::__construct($directory, 'installer');
 
-        if (!self::exists_in($this->directory)) {
+        if (!self::existsIn($this->directory)) {
             throw new InvalidArgumentException("No installer found in \"{$this->directory}\"");
         }
     }
@@ -26,7 +26,7 @@ class Project extends Module
      * @param string $directory
      * @return bool
      */
-    public static function exists_in($directory)
+    public static function existsIn($directory)
     {
         return file_exists($directory . '/mysite');
     }

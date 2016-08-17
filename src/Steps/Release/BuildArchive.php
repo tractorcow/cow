@@ -82,7 +82,7 @@ class BuildArchive extends Step
         if (!file_exists($folder)) {
             return;
         }
-        
+
         // remove a file encountered by a recursive call.
         if (is_file($folder) || is_link($folder)) {
             unlink($folder);
@@ -111,7 +111,7 @@ class BuildArchive extends Step
     protected function copy($from, $to)
     {
         $this->unlink($to);
-        
+
         // Copy file if not a folder
         if (!is_dir($from)) {
             if (copy($from, $to) === false) {
@@ -119,7 +119,7 @@ class BuildArchive extends Step
             }
             return;
         }
-        
+
         // Create destination
         if (mkdir($to) === false) {
             throw new Exception("Could not create destination folder {$to}");
@@ -180,7 +180,8 @@ class BuildArchive extends Step
         $pathArg = escapeshellarg($path);
         $this->runCommand(
             $output,
-            "cd {$pathArg} && php composer.phar create-project silverstripe/installer ./{$cmsArchive} {$version} --prefer-dist --no-dev",
+            "cd {$pathArg} && php composer.phar create-project silverstripe/installer "
+            . "./{$cmsArchive} {$version} --prefer-dist --no-dev",
             "Could not install version {$version} from composer"
         );
 
@@ -195,12 +196,13 @@ class BuildArchive extends Step
         $this->log($output, "Create framework-only project");
         $this->copy("{$path}/{$cmsArchive}/", "{$path}/{$frameworkArchive}/");
         $pathArg = escapeshellarg("{$path}/{$frameworkArchive}");
+        $remove = ['silverstripe/cms', 'silverstripe/siteconfig', 'silverstripe/reports'];
         $this->runCommand(
             $output,
-            "cd {$pathArg} && php composer.phar remove silverstripe/cms silverstripe/siteconfig silverstripe/reports --update-no-dev",
+            "cd {$pathArg} && php composer.phar remove " . implode(' ', $remove) . " --update-no-dev",
             "Could not generate framework only version"
         );
-        
+
         // Remove development files not needed in the archive package
         $this->log($output, "Remove development files");
         foreach (array("{$path}/{$cmsArchive}", "{$path}/{$frameworkArchive}") as $archivePath) {

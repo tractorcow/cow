@@ -29,7 +29,11 @@ class TagModules extends ModuleStep
      * @param bool $listIsExclusive If this list is exclusive. If false, this is inclusive
      */
     public function __construct(
-        Command $command, ReleaseVersion $version, $directory = '.', $modules = array(), $listIsExclusive = false
+        Command $command,
+        ReleaseVersion $version,
+        $directory = '.',
+        $modules = array(),
+        $listIsExclusive = false
     ) {
         parent::__construct($command, $directory, $modules, $listIsExclusive);
         $this->version = $version;
@@ -52,7 +56,7 @@ class TagModules extends ModuleStep
         foreach ($this->getModules() as $module) {
             $this->log($output, "Tagging module " . $module->getName());
             $tags = $module->getTags();
-            if(in_array($tag, $tags)) {
+            if (in_array($tag, $tags)) {
                 $this->log($output, "Skipping existing tag: <info>{$tag}</info>");
             } else {
                 $module->addTag($tag);
