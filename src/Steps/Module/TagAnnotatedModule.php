@@ -14,6 +14,7 @@ use SilverStripe\Cow\Steps\Step;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Process\Process;
 
 class TagAnnotatedModule extends Step
 {
@@ -159,7 +160,16 @@ class TagAnnotatedModule extends Step
         // Check token and authenticate
         $token = getenv('GITHUB_API_TOKEN');
         if (empty($token)) {
-            throw new \InvalidArgumentException("Missing GITHUB_API_TOKEN: Cannot authenticate with github");
+            //try composer stored oauth token
+            $process = new Process('composer config -g github-oauth.github.com');
+            $process->run();
+            if ($process->isSuccessful()) {
+                // output will have new line charachter at the end
+                $token = trim($process->getOutput());
+            }
+            if (empty($token)) {
+                throw new \InvalidArgumentException("Couldn't determine GitHub oAuth token. Please set GITHUB_API_TOKEN");
+            }
         }
         $client = $this->getClient($token);
 
