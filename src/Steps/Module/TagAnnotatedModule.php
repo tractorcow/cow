@@ -49,6 +49,11 @@ class TagAnnotatedModule extends Step
     protected $module;
 
     /**
+     * @var string
+     */
+    protected $message;
+
+    /**
      * @return Module
      */
     public function getModule()
@@ -120,17 +125,34 @@ class TagAnnotatedModule extends Step
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getMessage() {
+        return $this->message ?: $this->getVersion()->getValue();
+    }
+
+    /**
+     * @param $message string
+     * @return $this
+     */
+    public function setMessage($message) {
+        $this->message = $message;
+        return $this;
+    }
+
     public function getStepName()
     {
         return 'tag-annotated';
     }
 
-    public function __construct(Command $command, ReleaseVersion $version, ReleaseVersion $from, $directory, $module)
+    public function __construct(Command $command, ReleaseVersion $version, ReleaseVersion $from, $directory, $module, $message)
     {
         parent::__construct($command);
         $this->setVersion($version);
         $this->setFrom($from);
         $this->setProject(new Project($directory));
+        $this->setMessage($message);
         $module = $this->getProject()->getModule($module);
         if (empty($module)) {
             throw new \InvalidArgumentException("No module $module found in project");
@@ -209,7 +231,7 @@ class TagAnnotatedModule extends Step
         $result = $reposAPI->releases()->create($org, $repo, [
             'tag_name' => $version->getValue(),
             'target_commitish' => $sha,
-            'name' => $version->getValue(),
+            'name' => $this->getMessage(),
             'body' => $markdown,
             'prerelease' => in_array($version->getStability(), ['rc', 'beta', 'alpha']),
             'draft' => false,

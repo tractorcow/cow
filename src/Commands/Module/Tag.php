@@ -23,6 +23,7 @@ class Tag extends Command
         $this->addArgument('version', InputArgument::REQUIRED, 'Version tag');
         $this->addOption('from', 'f', InputOption::VALUE_REQUIRED, 'Version to generate changelog from');
         $this->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Project root directory');
+        $this->addOption('message', 'm', InputOption::VALUE_REQUIRED, 'Release title to display on GitHub releases page');
     }
 
     /**
@@ -34,8 +35,9 @@ class Tag extends Command
         $module = $this->getInputModule();
         $directory = $this->getInputDirectory();
         $fromVersion = $this->getInputFromVersion($version);
+        $message = $this->getInputMessage();
 
-        $step = new TagAnnotatedModule($this, $version, $fromVersion, $directory, $module);
+        $step = new TagAnnotatedModule($this, $version, $fromVersion, $directory, $module, $message);
         $step->run($this->input, $this->output);
     }
 
@@ -91,5 +93,15 @@ class Tag extends Command
     protected function getInputModule()
     {
         return $this->input->getArgument('module');
+    }
+
+    /**
+     * Message title to use when tagging the release
+     *
+     * @return string
+     */
+    protected function getInputMessage()
+    {
+        return $this->input->getArgument('message');
     }
 }
