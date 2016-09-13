@@ -102,6 +102,6 @@ class Tag extends Command
      */
     protected function getInputMessage()
     {
-        return $this->input->getArgument('message');
+        return $this->input->getOption('message');
     }
 }
