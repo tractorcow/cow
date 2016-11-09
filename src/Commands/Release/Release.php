@@ -34,7 +34,8 @@ class Release extends Command
             ->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Optional directory to release project from')
             ->addOption('security', 's', InputOption::VALUE_NONE, 'Update git remotes to point to security project')
             ->addOption('branch', 'b', InputOption::VALUE_REQUIRED, 'Branch each module to this')
-            ->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch');
+            ->addOption('branch-auto', 'a', InputOption::VALUE_NONE, 'Automatically branch to major.minor.patch')
+            ->addOption('skip-tests', null, InputOption::VALUE_NONE, 'Skip the tests suite run when performing the release');
     }
 
     protected function fire()
@@ -60,9 +61,11 @@ class Release extends Command
         $translate = new UpdateTranslations($this, $directory, $modules);
         $translate->run($this->input, $this->output);
 
-        // Run tests
-        $test = new RunTests($this, $directory);
-        $test->run($this->input, $this->output);
+        if (!$this->input->hasOption('skip-tests')) {
+            // Run tests
+            $test = new RunTests($this, $directory);
+            $test->run($this->input, $this->output);
+        }
 
         // Generate changelog
         $changelogs = new CreateChangelog($this, $version, $fromVersion, $directory, $modules);
