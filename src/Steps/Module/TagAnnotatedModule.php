@@ -213,9 +213,8 @@ class TagAnnotatedModule extends Step
     protected function getClient($token)
     {
         // Create authenticated github client
-        $client = new GithubClient();
         $httpClient = new GuzzleClient();
-        $client->setHttpClient($httpClient);
+        $client = GithubClient::createWithHttpClient($httpClient);
         $client->authenticate($token, null, GithubClient::AUTH_HTTP_TOKEN);
         return $client;
     }
