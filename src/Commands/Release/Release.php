@@ -61,7 +61,7 @@ class Release extends Command
         $translate = new UpdateTranslations($this, $directory, $modules);
         $translate->run($this->input, $this->output);
 
-        if (!$this->input->hasOption('skip-tests')) {
+        if (!$this->input->getOption('skip-tests')) {
             // Run tests
             $test = new RunTests($this, $directory);
             $test->run($this->input, $this->output);
