@@ -52,7 +52,7 @@ class Release extends Command
 
         // Once the project is setup, we can extract the module list to publish
         $modules = $this->getReleaseModules($directory);
-
+/*
         // Change to the correct temp branch (if given)
         $branch = new CreateBranch($this, $directory, $branch, $modules);
         $branch->run($this->input, $this->output);
@@ -66,7 +66,7 @@ class Release extends Command
             $test = new RunTests($this, $directory);
             $test->run($this->input, $this->output);
         }
-
+*/
         // Generate changelog
         $changelogs = new CreateChangelog($this, $version, $fromVersion, $directory, $modules);
         $changelogs->run($this->input, $this->output);
@@ -198,6 +198,9 @@ class Release extends Command
             }
 
             list($vendor, $module) = explode('/', $module);
+            if ($module === 'framework') {
+                $module = 'sapphire';
+            }
             $modules[] = $module;
         }
         return $modules;

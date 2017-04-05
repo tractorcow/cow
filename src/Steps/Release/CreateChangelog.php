@@ -32,7 +32,8 @@ class CreateChangelog extends ModuleStep
      */
     protected $paths = array(
         "framework/docs/en/04_Changelogs",
-        "framework/docs/en/changelogs"
+        "framework/docs/en/changelogs",
+        "sapphire/docs/en/changelogs"
     );
 
     /**
@@ -184,7 +185,10 @@ class CreateChangelog extends ModuleStep
         // Get framework to commit to
         $framework = $this->getProject()->getModule('framework');
         if (!$framework) {
-            throw new Exception("Could not find module framework in project " . $this->getProject()->getDirectory());
+            $framework = $this->getProject()->getModule('sapphire');
+            if (!$framework) {
+                throw new Exception("Could not find module framework in project " . $this->getProject()->getDirectory());
+            }
         }
         $repo = $framework->getRepository();
 

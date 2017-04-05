@@ -176,6 +176,7 @@ class BuildArchive extends Step
 
         // Install to this location
         $version = $this->version->getValue();
+        $version = '2.5.0';
         $this->log($output, "Installing version {$version}");
         $pathArg = escapeshellarg($path);
         $this->runCommand(
@@ -189,7 +190,7 @@ class BuildArchive extends Step
         // Write version info to the core folders (shouldn't be in version control)
         $this->log($output, "Copying additional files");
         $this->copy("{$path}/composer.phar", "{$path}/{$cmsArchive}/composer.phar");
-        $this->write("{$path}/{$cmsArchive}/framework/silverstripe_version", $version);
+        $this->write("{$path}/{$cmsArchive}/sapphire/silverstripe_version", $version);
         $this->write("{$path}/{$cmsArchive}/cms/silverstripe_version", $version);
 
         // Copy to framework folder
@@ -207,11 +208,11 @@ class BuildArchive extends Step
         $this->log($output, "Remove development files");
         foreach (array("{$path}/{$cmsArchive}", "{$path}/{$frameworkArchive}") as $archivePath) {
             $this->unlink("{$archivePath}/cms/tests/");
-            $this->unlink("{$archivePath}/framework/tests/");
-            $this->unlink("{$archivePath}/framework/admin/tests/");
+            $this->unlink("{$archivePath}/sapphire/tests/");
+            $this->unlink("{$archivePath}/sapphire/admin/tests/");
             $this->unlink("{$archivePath}/reports/tests/");
             $this->unlink("{$archivePath}/siteconfig/tests/");
-            $this->unlink("{$archivePath}/framework/docs/");
+            $this->unlink("{$archivePath}/sapphire/docs/");
         }
 
         // Remove Page.php from framework-only module
